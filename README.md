@@ -4,6 +4,9 @@ Kotlin/Compose-Desktop-Projekt für ein Schülerpraktikum: Roboter kämpfen auf 
 
 Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material** (Zeitplan, Tagesprogramme, Backlog, Musterlösungen) liegt in [`docs/`](docs/).
 
+<img src="docs/images/screenshot.png" alt="Bot-Match Screenshot" width="600">
+
+
 ## Für den Dozenten: Schnelleinstieg
 
 1. Lies [`docs/setup.md`](docs/setup.md) — IntelliJ/JDK-Setup, Projekt öffnen, App starten.
