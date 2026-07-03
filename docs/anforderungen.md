@@ -6,7 +6,7 @@ Ausgangslage und Vorgaben, aus denen dieser Kurs entstanden ist. Dient als Refer
 
 - Schülerpraktikum, Gymnasium, 10. Klasse, 7 Schüler in 3 Teams.
 - Vorlauf bereits absolviert (nicht Teil dieses Repos): 2 Tage Kotlin-Grundlagen inkl. Objektorientierung, IntelliJ-Setup, Konsolen-I/O, Einführung Scrum (Pair Programming, Unit-Tests).
-- Fortsetzung: 3 weitere Tage, jeweils 8:00–15:00 Uhr.
+- Fortsetzung: 3 weitere Tage. Tag 1 kurz (9:00–13:00, danach externer KI-Vortrag), Tag 2+3 jeweils 9:00–15:00 Uhr.
 - Ziel der 3 Tage: tiefer in Kotlin eintauchen, echte Logik programmieren statt nur Konsolen-Übungen.
 
 ## Funktionale Anforderungen

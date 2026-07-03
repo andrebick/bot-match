@@ -23,14 +23,14 @@ Jede Karte = eine User Story. Auf der Karte notieren:
 
 Vorbereitung durch den Dozenten vor Tag 1: alle Storys aus `backlog.md` als Karten in die Backlog-Spalte, ohne Team-Zuordnung — jedes Team zieht sich seine Storys im Sprint Planning selbst.
 
-## Sprint Planning (Tag 1, 08:00–08:15)
+## Sprint Planning (Tag 1, 09:00–09:15)
 
 Kurz halten, das Backlog ist schon vorbereitet:
 1. Dozent erklärt kurz Sprint-Ziel: *"Bot mit mindestens zwei Verhaltensregeln, der ein Testduell übersteht."*
 2. Jedes Team wählt 2-3 Storys aus Epic 1 für den Start (siehe backlog.md — Reihenfolge der Epics ist als Empfehlung gedacht, Teams dürfen aber selbst entscheiden, auch quer durch die Epics).
 3. Karten wandern von Backlog nach To Do, mit Team-Buchstabe markiert.
 
-## Daily Standup (Tag 2 + 3, 08:00–08:15)
+## Daily Standup (Tag 2 + 3, 09:00–09:15)
 
 Reihum, ein Sprecher pro Team, max. 2 Minuten pro Team, 3 Fragen:
 1. Was haben wir seit gestern geschafft?
