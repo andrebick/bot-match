@@ -17,6 +17,7 @@ Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material
 6. Technischer Überblick über die Codebasis: [`CLAUDE.md`](CLAUDE.md).
 7. Ursprüngliche Anforderungen und Design-Entscheidungen: [`docs/anforderungen.md`](docs/anforderungen.md).
 8. Zum Ausdrucken: alle Markdown-Dateien liegen auch als PDF in [`docs/pdf/`](docs/pdf/) (Backlog zusätzlich als Story-Karten in Groß, siehe [`docs/pdf/README.md`](docs/pdf/README.md)).
+9. Kurze Bewegungspause nach einer Pause: [`docs/energizer-menschlicher-bot.md`](docs/energizer-menschlicher-bot.md) (Tag 1), [`docs/energizer-schnick-schnack-schnuck-turnier.md`](docs/energizer-schnick-schnack-schnuck-turnier.md) (Tag 3).
 
 ## Für Schüler: eigenen Bot bauen
 
