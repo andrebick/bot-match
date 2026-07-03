@@ -11,11 +11,12 @@ Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material
 
 1. Lies [`docs/setup.md`](docs/setup.md) — IntelliJ/JDK-Setup, Projekt öffnen, App starten.
 2. Lies [`docs/zeitplan.md`](docs/zeitplan.md) — Stunde-für-Stunde-Ablauf aller 3 Tage.
-3. Details je Tag: [`docs/tag-1.md`](docs/tag-1.md), [`docs/tag-2.md`](docs/tag-2.md), [`docs/tag-3.md`](docs/tag-3.md).
+3. Details je Tag: [`docs/tag-1.md`](docs/tag-1.md), [`docs/tag-2.md`](docs/tag-2.md), [`docs/tag-3.md`](docs/tag-3.md). Für den Framework-Walkthrough an Tag 1: [`docs/tag-1-framework-walkthrough.md`](docs/tag-1-framework-walkthrough.md) (Inhalt) und [`docs/tag-1-praesentation.md`](docs/tag-1-praesentation.md) (Ablauf/Regie).
 4. Backlog für die Schüler: [`docs/backlog.md`](docs/backlog.md) — Musterlösungen dazu **nur für dich**: [`docs/dozent/loesungen.md`](docs/dozent/loesungen.md).
 5. Scrum-Board-Vorlage: [`docs/scrum-board.md`](docs/scrum-board.md).
 6. Technischer Überblick über die Codebasis: [`CLAUDE.md`](CLAUDE.md).
 7. Ursprüngliche Anforderungen und Design-Entscheidungen: [`docs/anforderungen.md`](docs/anforderungen.md).
+8. Zum Ausdrucken: alle Markdown-Dateien liegen auch als PDF in [`docs/pdf/`](docs/pdf/) (Backlog zusätzlich als Story-Karten in Groß, siehe [`docs/pdf/README.md`](docs/pdf/README.md)).
 
 ## Für Schüler: eigenen Bot bauen
 

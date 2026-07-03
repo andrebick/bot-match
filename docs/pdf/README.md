@@ -1,7 +1,8 @@
 # PDF-Export für `docs/backlog.md`
 
 Erzeugt zwei druckbare PDF-Varianten aus dem Backlog. Quelle ist immer
-`docs/backlog.md` — die Skripte hier verändern das Markdown nicht.
+`docs/backlog.md` — die Skripte hier verändern das Markdown nicht. Die fertigen
+PDFs liegen direkt in diesem Ordner, die Erzeugungs-Skripte in [`build/`](build/).
 
 ## Voraussetzungen
 
@@ -13,35 +14,56 @@ Erzeugt zwei druckbare PDF-Varianten aus dem Backlog. Quelle ist immer
 
 ## Varianten
 
-### `build.sh` → `docs/backlog.pdf`
+### `build/build.sh` → `docs/pdf/backlog.pdf`
 
 Hochformat, A4, jede Story in einer Box, mehrere Storys pro Seite,
 Inhaltsverzeichnis. Zum normalen Durchlesen/Ausdrucken als Heft.
 
 ```bash
-docs/pdf/build.sh
+docs/pdf/build/build.sh
 ```
 
-### `build-landscape.sh` → `docs/backlog-landscape.pdf`
+### `build/build-landscape.sh` → `docs/pdf/backlog-landscape.pdf`
 
 Querformat, A4, genau eine Story pro Seite, große Schrift. Für Story-Karten
 zum Ausschneiden/Auslegen (z.B. Scrum-Board).
 
 ```bash
-docs/pdf/build-landscape.sh
+docs/pdf/build/build-landscape.sh
 ```
 
-## Dateien
+### `build/build-docs.sh` → alle übrigen `docs/**/*.md` als PDF
 
-| Datei | Zweck |
-|---|---|
-| `build.sh` | Baut `backlog.pdf` (Hochformat) |
-| `build-landscape.sh` | Baut `backlog-landscape.pdf` (Querformat, 1 Story/Seite) |
-| `header.tex` | LaTeX-Box-Styling für die Hochformat-Variante |
-| `header-landscape.tex` | LaTeX-Box-Styling für die Querformat-Variante |
-| `storybox.lua` | Pandoc-Filter: umschließt jede `###`-Story mit einer Box |
-| `storybox-landscape.lua` | Wie oben, zusätzlich ein Seitenumbruch pro Story |
+Erzeugt für jede Markdown-Datei in `docs/` (außer `backlog.md`, das die beiden
+Skripte oben abdecken) ein gleichnamiges PDF unter `docs/pdf/`, inkl.
+Unterordnern (z.B. `docs/dozent/loesungen.md` → `docs/pdf/dozent/loesungen.pdf`).
+Einfaches Hochformat mit Inhaltsverzeichnis, keine Story-Boxen.
 
-## Nach Änderungen an `backlog.md`
+```bash
+docs/pdf/build/build-docs.sh
+```
 
-Beide Skripte einfach erneut ausführen — die PDFs werden komplett neu erzeugt.
+## Ordnerstruktur
+
+```
+docs/pdf/
+  backlog.pdf              fertiges PDF, Hochformat
+  backlog-landscape.pdf    fertiges PDF, Querformat (1 Story/Seite)
+  <name>.pdf               je ein PDF pro sonstiger docs/<name>.md
+  dozent/loesungen.pdf     Unterordner gespiegelt
+  build/
+    build.sh                   Baut backlog.pdf
+    build-landscape.sh         Baut backlog-landscape.pdf
+    build-docs.sh              Baut alle übrigen docs/**/*.md als PDF
+    header.tex                 LaTeX-Box-Styling für die Hochformat-Variante
+    header-landscape.tex       LaTeX-Box-Styling für die Querformat-Variante
+    header-docs.tex            LaTeX-Styling für die einfachen Doku-PDFs
+    storybox.lua                Pandoc-Filter: umschließt jede `###`-Story mit einer Box
+    storybox-landscape.lua      Wie oben, zusätzlich ein Seitenumbruch pro Story
+```
+
+## Nach Änderungen an einer `.md`-Datei
+
+Passendes Skript erneut ausführen — für `backlog.md` `build.sh` bzw.
+`build-landscape.sh`, für alle anderen Dateien `build-docs.sh` (baut dabei
+einfach alle PDFs neu).

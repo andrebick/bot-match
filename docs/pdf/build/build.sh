@@ -1,23 +1,23 @@
 #!/bin/bash
-# Erzeugt docs/backlog.pdf aus docs/backlog.md.
-# Aufruf: docs/pdf/build.sh
+# Erzeugt docs/pdf/backlog.pdf aus docs/backlog.md.
+# Aufruf: docs/pdf/build/build.sh
 set -euo pipefail
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/../../.."
 
 TMP=$(mktemp -t backlog-pdf).md
 trap 'rm -f "$TMP"' EXIT
 sed 's/→/->/g' docs/backlog.md > "$TMP"
 
 pandoc "$TMP" \
-  -o docs/backlog.pdf \
+  -o docs/pdf/backlog.pdf \
   --pdf-engine=xelatex \
   -V documentclass=extarticle \
   -V geometry:"a4paper,margin=1.5cm" \
   -V mainfont="Helvetica Neue" \
   -V fontsize=14pt \
   -V colorlinks=true \
-  --include-in-header=docs/pdf/header.tex \
-  --lua-filter=docs/pdf/storybox.lua \
+  --include-in-header=docs/pdf/build/header.tex \
+  --lua-filter=docs/pdf/build/storybox.lua \
   --toc --toc-depth=2
 
-echo "docs/backlog.pdf erzeugt."
+echo "docs/pdf/backlog.pdf erzeugt."
