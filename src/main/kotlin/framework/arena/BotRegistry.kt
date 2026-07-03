@@ -20,7 +20,8 @@ object BotRegistry {
             bots.examples.RandomBot(),
             bots.examples.StillstandBot(),
             bots.examples.ChaserBot(),
-            bots.examples.FluchtBot()
+            bots.examples.FluchtBot(),
+            bots.examples.PowerBot()
         )
     )
 
