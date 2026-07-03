@@ -17,6 +17,11 @@ Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material
 6. Technischer Überblick über die Codebasis: [`CLAUDE.md`](CLAUDE.md).
 7. Ursprüngliche Anforderungen und Design-Entscheidungen: [`docs/anforderungen.md`](docs/anforderungen.md).
 
+## Für Schüler: eigenen Bot bauen
+
+Anleitung mit Beispielen, wie ihr euren Roboter steuert:
+[`docs/schueler-framework-guide.md`](docs/schueler-framework-guide.md).
+
 ## Projekt starten
 
 Voraussetzung: JDK 17+ (JetBrains Runtime aus IntelliJ reicht), Internetzugang beim ersten Build (Gradle lädt Dependencies von Maven Central).
