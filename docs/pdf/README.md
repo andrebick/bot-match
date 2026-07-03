@@ -1,8 +1,9 @@
-# PDF-Export für `docs/backlog.md`
+# PDF-Export für `docs/`
 
-Erzeugt zwei druckbare PDF-Varianten aus dem Backlog. Quelle ist immer
-`docs/backlog.md` — die Skripte hier verändern das Markdown nicht. Die fertigen
-PDFs liegen direkt in diesem Ordner, die Erzeugungs-Skripte in [`build/`](build/).
+Erzeugt druckbare PDFs aus den Markdown-Dateien in `docs/`. Quelle ist immer
+das jeweilige Markdown — die Skripte hier verändern es nicht. Die fertigen
+PDFs liegen direkt in diesem Ordner (Unterordner gespiegelt), die
+Erzeugungs-Skripte in [`build/`](build/).
 
 ## Voraussetzungen
 
@@ -37,7 +38,9 @@ docs/pdf/build/build-landscape.sh
 Erzeugt für jede Markdown-Datei in `docs/` (außer `backlog.md`, das die beiden
 Skripte oben abdecken) ein gleichnamiges PDF unter `docs/pdf/`, inkl.
 Unterordnern (z.B. `docs/dozent/loesungen.md` → `docs/pdf/dozent/loesungen.pdf`).
-Einfaches Hochformat mit Inhaltsverzeichnis, keine Story-Boxen.
+Einfaches Hochformat mit Inhaltsverzeichnis, keine Story-Boxen. Baut dabei
+immer alle betroffenen PDFs neu, unabhängig davon, ob sich das jeweilige
+Markdown geändert hat.
 
 ```bash
 docs/pdf/build/build-docs.sh
@@ -66,4 +69,5 @@ docs/pdf/
 
 Passendes Skript erneut ausführen — für `backlog.md` `build.sh` bzw.
 `build-landscape.sh`, für alle anderen Dateien `build-docs.sh` (baut dabei
-einfach alle PDFs neu).
+einfach alle PDFs neu, es gibt keine Datei-für-Datei-Erkennung).
+

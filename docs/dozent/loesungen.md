@@ -2,7 +2,7 @@
 
 Nicht an Schüler weitergeben, bevor sie es selbst versucht haben. Lösungen sind bewusst einfach gehalten (Anfänger-Niveau), nicht "optimal" im Sinne von cleverem Kotlin — Ziel ist Nachvollziehbarkeit, nicht Eleganz.
 
-Alle Beispiele gehen von `import framework.arena.*` aus. Hilfsfunktionen (z.B. Distanzberechnung), die in mehreren Lösungen wiederkehren, sind bei der ersten Verwendung ausgeschrieben und danach nur noch referenziert — echte Referenzimplementierungen dieser Muster liegen bereits fertig in `bots/examples/` (`RandomBot`, `StillstandBot`, `ChaserBot`, `FluchtBot`), auf die man Schüler bei Bedarf verweisen kann, ohne die Lösung direkt zu zeigen.
+Alle Beispiele gehen von `import framework.arena.*` aus. Hilfsfunktionen (z.B. Distanzberechnung), die in mehreren Lösungen wiederkehren, sind bei der ersten Verwendung ausgeschrieben und danach nur noch referenziert — echte Referenzimplementierungen dieser Muster liegen bereits fertig in `bots/examples/` (`RandomBot`, `StillstandBot`, `ChaserBot`, `FluchtBot`, `PowerBot`), auf die man Schüler bei Bedarf verweisen kann, ohne die Lösung direkt zu zeigen.
 
 ---
 

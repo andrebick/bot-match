@@ -24,10 +24,11 @@ framework/arena/   Reine JVM-Logik, KEINE Compose-Abhängigkeit
 
 framework/ui/       Compose Desktop, konsumiert nur die public API von GameEngine
   App.kt              State-Owner, LaunchedEffect-Tick-Loop, Layout
-  ArenaCanvas.kt      Zeichnet Grid + Roboter + Healthbars
+  ArenaCanvas.kt      Zeichnet Grid + Roboter + Healthbars + Schuss-Linien/Explosionen
+  SoundPlayer.kt      Erzeugt Schuss-Sound synthetisch (javax.sound.sampled, kein Audio-Asset)
   Scoreboard.kt / LogPanel.kt / Controls.kt
 
-bots/examples/      Vom Dozenten gepflegte Referenz-Bots (RandomBot, StillstandBot, ChaserBot, FluchtBot)
+bots/examples/      Vom Dozenten gepflegte Referenz-Bots (RandomBot, StillstandBot, ChaserBot, FluchtBot, PowerBot)
 bots/teama|b|c/      Von Schülern gepflegte Bot-Klasse + teamXBots-Liste (Konvention, siehe unten)
 ```
 
@@ -55,11 +56,12 @@ Bot-IDs sind `"bot-0"`, `"bot-1"`, ... in Reihenfolge der `brains`-Liste bei `st
 ## Wichtige Design-Entscheidungen (nicht offensichtlich, bitte beim Ändern beachten)
 
 - **Kein Coroutine-Timeout für Bot-Code.** `withTimeoutOrNull` kann CPU-lastige Endlosschleifen ohne Suspension-Point nicht abbrechen (kooperative Cancellation). `BotExecutor` nutzt stattdessen einen dedizierten Daemon-Thread-Pool + `Future.get(timeoutMs)`. Ein hängender Thread wird nicht gestoppt (technisch bei reinen CPU-Loops nicht sauber möglich), sondern nach 3 aufeinanderfolgenden Timeouts "eingefroren" (bekommt keine neuen Threads mehr zugewiesen, liefert nur noch `Action.Wait`).
+- **`BotExecutor` erzwingt alle `shakeUpEveryTicks` Ticks (Default 25) eine zufällige `Action.Move` statt `decide()` aufzurufen.** Verhindert, dass sich zwei (oder mehr) Bots dauerhaft gegenseitig blockieren, z.B. weil sie jeden Tick aufs selbe besetzte Feld ziehen wollen und die Move-Auflösung das jedes Mal ablehnt. Move statt Shoot/Wait, weil nur eine tatsächliche Positionsänderung so eine Pattsituation aufbricht. 0 deaktiviert das Verhalten.
 - **Move-Auflösung ist snapshot-basiert.** Alle Zielzellen werden gegen den Zustand zu Tick-Beginn geprüft, nicht gegen bereits aktualisierte Positionen. Sonst hinge das Ergebnis von der internen Abarbeitungsreihenfolge der Bot-Liste ab. Kein Swap zwischen zwei sich kreuzenden Bots erlaubt; bei Zielkonflikt (2 Bots wollen ins selbe freie Feld) bewegt sich keiner.
 - **Shot-Schaden wird gesammelt, nicht sofort angewendet.** Erst alle Treffer eines Ticks sammeln, dann gemeinsam Schaden anwenden — sonst würde die Abarbeitungsreihenfolge der Schützen beeinflussen, ob ein bereits „totgeschossener“ Bot in diesem Tick noch als gültiges Ziel zählt.
 - **Kein Team-/Friendly-Fire-Konzept.** `RobotState.teamName` wird 1:1 aus `RobotBrain.name` übernommen. Die Gruppierung in `BotRegistry.allTeams` (Team A/B/C) ist rein organisatorisch für UI-Anzeige und Backlog — spielerisch ist es ein reines Free-for-all, jeder Bot kämpft für sich. Das ist bewusst so gewählt, um die Engine einfach zu halten; falls das erweitert werden soll, betrifft das `resolveShots()` in `GameEngine.kt`.
 - **`RobotState.alive` ist eine abgeleitete Property** (`health > 0`), kein gespeichertes Feld — verhindert inkonsistente Zustände über `copy()` (z.B. `health = 0` ohne `alive` nachzuziehen).
-- **Startpositionen sind deterministisch** (`computeStartPositions`, entlang des Arena-Perimeters verteilt), kein `Random` — damit Engine-Tests reproduzierbar sind.
+- **Startpositionen werden am Arena-Perimeter berechnet (`computeStartPositions`, deterministisch, kein `Random`) und dann in `startMatch()` zufällig auf die Bots verteilt (`.shuffled()`).** Die deterministische Berechnung bleibt isoliert testbar (Engine-Tests), das Shuffling sorgt dafür, dass nicht z.B. immer `bot-0` denselben Startplatz bekommt.
 
 ## Schüler-Bot-Konvention
 

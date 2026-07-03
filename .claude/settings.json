@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; rel=\"${f#$CLAUDE_PROJECT_DIR/}\"; case \"$rel\" in docs/pdf/*) ;; docs/*.md) \"$CLAUDE_PROJECT_DIR/docs/pdf/build/build-docs.sh\" >/tmp/build-docs-hook.log 2>&1 ;; esac; } 2>/dev/null || true",
+            "statusMessage": "Rebuilding docs PDFs..."
+          }
+        ]
+      }
+    ]
+  }
+}

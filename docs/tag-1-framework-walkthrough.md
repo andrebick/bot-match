@@ -136,7 +136,7 @@ rechts. Nicht erklären, wie das gebaut ist — nur, dass es existiert und ferti
 
 ---
 
-## 2. Das Domain-Modell — `framework/arena/Models.kt` (56 Zeilen)
+## 2. Das Domain-Modell — `framework/arena/Models.kt` (55 Zeilen)
 
 Datei komplett öffnen, im Editor von oben nach unten scrollen. Das ist die
 zentrale Datei — hier stehen alle "Bausteine", mit denen ein Bot arbeitet.
@@ -385,7 +385,7 @@ eine Funktion, die aus `Sensors` eine `Action` macht."*
 ## 3. Wie wird `decide()` aufgerufen? — `GameEngine.step()`
 
 Jetzt bewusst **weg vom Code, hin zur Tafel/Whiteboard** — als Kontrastmoment. Die
-Datei `GameEngine.kt` selbst ist mit 285 Zeilen zu dicht und nutzt fortgeschrittene
+Datei `GameEngine.kt` selbst ist mit über 300 Zeilen zu dicht und nutzt fortgeschrittene
 Kotlin-Konzepte (Higher-Order-Functions, `groupBy`, Destructuring), die für
 Kotlin-Anfänger noch zu viel wären. Stattdessen den Ablauf **als Diagramm** an die
 Tafel zeichnen:
@@ -453,6 +453,12 @@ ausprobieren, ohne dass ihr den anderen Teams das Spiel kaputt macht."*
 Falls jemand nachfragt, wie das technisch geht: *"Jeder Bot-Aufruf läuft in einem
 eigenen kurzen Zeitfenster. Wenn er dieses Fenster verpasst oder abstürzt, wird das
 abgefangen."* Mehr Tiefe ist für den Rahmen nicht nötig.
+
+Falls jemand fragt, warum sich sein Bot gelegentlich auch ohne Fehler mal "komisch"
+bewegt: *"Alle 25 Ticks erzwingt das Spiel bei jedem Bot einen zufälligen Schritt.
+Das verhindert, dass zwei Bots sich für immer gegenseitig blockieren, wenn sie
+z.B. beide aufs gleiche Feld wollen. Das ist normales Verhalten, kein Fehler in
+eurem Code."*
 
 ---
 

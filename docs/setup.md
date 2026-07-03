@@ -10,7 +10,7 @@ Diese Anleitung geht davon aus, dass IntelliJ IDEA bereits an Tag 1/2 installier
 
 ## Projekt öffnen
 
-1. IntelliJ starten → **Open** → den Ordner `robot-games` auswählen (nicht eine einzelne Datei).
+1. IntelliJ starten → **Open** → den Ordner `bot-match` auswählen (nicht eine einzelne Datei).
 2. IntelliJ erkennt automatisch das Gradle-Projekt und importiert es. Das dauert beim ersten Mal 2-5 Minuten (Dependency-Download). Unten rechts läuft ein Fortschrittsbalken ("Sync" / "Indexing").
 3. Falls IntelliJ nach einem JDK fragt: die vorgeschlagene JetBrains-Runtime (JBR) auswählen, oder falls keine automatisch erkannt wird, unter **File → Project Structure → SDK** ein JDK 17+ setzen.
 
