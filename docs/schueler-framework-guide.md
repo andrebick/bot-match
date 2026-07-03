@@ -164,6 +164,24 @@ Gegner, der in **exakt derselben Zeile** (gleiches `y`) rechts von euch steht.
 Steht kein Gegner in dieser Linie, verpufft der Schuss wirkungslos — es passiert
 nichts Schlimmes, aber ihr richtet auch keinen Schaden an.
 
+**Ein Roboter blockiert die Sichtlinie.** Trifft euer Schuss nicht den Gegner,
+den ihr im Sinn hattet, sondern steht ein anderer Roboter näher in derselben
+Linie, wird stattdessen der getroffen. Ihr könnt also nicht "durch" einen
+Roboter hindurchschießen.
+
+**Ihr könnt euch nicht durch andere Roboter hindurchbewegen.** Ein Zielfeld,
+auf dem zu Beginn des Ticks noch ein lebender Roboter steht, ist blockiert —
+auch wenn dieser Roboter im selben Tick selbst wegzieht. Alle Bewegungswünsche
+eines Ticks werden nämlich gleichzeitig gegen den Zustand *vor* dem Tick
+geprüft, nicht nacheinander. Daraus folgen drei Fälle:
+
+- **Besetztes Feld:** Ziel war zu Tick-Beginn belegt -> ihr bleibt stehen,
+  auch wenn der Bewohner im gleichen Tick wegzieht.
+- **Kein Platztausch:** Zwei Roboter, die genau die Plätze tauschen wollen,
+  bleiben beide stehen (ist quasi eine Sonderform des besetzten Felds).
+- **Zielkonflikt:** Wollen zwei oder mehr Roboter ins selbe freie Feld,
+  bewegt sich keiner von ihnen.
+
 ---
 
 ## 3. Ein Bot, Schritt für Schritt aufgebaut
