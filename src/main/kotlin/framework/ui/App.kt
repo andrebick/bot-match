@@ -131,6 +131,7 @@ fun App(availableBrains: List<RobotBrain>) {
             })
             robots = engine.currentStates()
             shots = engine.lastShots()
+            if (shots.isNotEmpty()) SoundPlayer.playShot()
             if (status == MatchStatus.FINISHED) {
                 isRunning = false
                 val result = engine.result()
