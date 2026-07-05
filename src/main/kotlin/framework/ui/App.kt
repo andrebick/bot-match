@@ -88,6 +88,24 @@ private fun fallbackTestBrains(): List<RobotBrain> = listOf(
 )
 
 /**
+ * Baut den Sieg-Eintrag fürs Log als ASCII-Art-Banner, damit der Gewinner
+ * zwischen den vielen Tick-Zeilen sofort ins Auge fällt statt in einer
+ * normalen Textzeile unterzugehen. Ein einziger mehrzeiliger Log-Eintrag
+ * (nicht mehrere einzelne), damit LogPanel ihn als zusammenhängenden Block
+ * an einer Position anzeigt statt die Zeilen einzeln umzusortieren.
+ */
+private fun winBanner(winnerName: String, ticksPlayed: Int): String {
+    val text = "$winnerName GEWINNT!"
+    val border = "*".repeat(text.length + 8)
+    return """
+        |$border
+        |*   $text   *
+        |$border
+        |Match beendet nach $ticksPlayed Ticks.
+    """.trimMargin()
+}
+
+/**
  * Einstiegspunkt der UI. [availableBrains] wird von außen (Main.kt, später via
  * BotRegistry) übergeben. Falls davon weniger als 2 Einträge kommen (z.B.
  * solange die echten Bots noch nicht fertig sind), greifen wir auf 3 einfache
@@ -148,7 +166,7 @@ fun App(availableBrains: List<RobotBrain>) {
                     else -> {
                         val winnerState = result.finalStates.find { it.id == result.winnerId }
                         winnerId = result.winnerId
-                        "Match beendet nach ${result.ticksPlayed} Ticks: ${winnerState?.teamName ?: result.winnerId} gewinnt!"
+                        winBanner(winnerState?.teamName ?: result.winnerId ?: "?", result.ticksPlayed)
                     }
                 }
                 logEntries = (logEntries + summary).takeLast(500)

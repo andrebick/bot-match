@@ -148,9 +148,9 @@ class GameEngineTest {
         val executor = BotExecutor(timeoutMs = 100)
         val logs = mutableListOf<String>()
 
-        val action = executor.decideSafely(ThrowingBrain(), dummySensors(), "crasher", logs::add)
+        val decision = executor.decideSafely(ThrowingBrain(), dummySensors(), "crasher", logs::add)
 
-        assertEquals(Action.Wait, action)
+        assertEquals(Action.Wait, decision.action)
         assertTrue(logs.any { it.contains("Fehler") })
         executor.shutdown()
     }
@@ -160,9 +160,9 @@ class GameEngineTest {
         val executor = BotExecutor(timeoutMs = 50)
         val logs = mutableListOf<String>()
 
-        val action = executor.decideSafely(SlowBrain(), dummySensors(), "slow", logs::add)
+        val decision = executor.decideSafely(SlowBrain(), dummySensors(), "slow", logs::add)
 
-        assertEquals(Action.Wait, action)
+        assertEquals(Action.Wait, decision.action)
         assertTrue(logs.any { it.contains("Zeitlimit") })
         executor.shutdown()
     }
@@ -173,10 +173,12 @@ class GameEngineTest {
         val logs = mutableListOf<String>()
 
         // An einem Shake-up-Tick (25) darf decide() gar nicht erst aufgerufen werden -
-        // ein crashender Bot würde sonst loggen. Ergebnis ist eine Bewegung.
-        val action = executor.decideSafely(ThrowingBrain(), dummySensors(tick = 25), "crasher", logs::add)
+        // ein crashender Bot würde sonst loggen. Ergebnis ist eine Bewegung, markiert
+        // als Shake-up (isShakeUp), damit sie sich im Protokoll von Bot-Entscheidungen unterscheidet.
+        val decision = executor.decideSafely(ThrowingBrain(), dummySensors(tick = 25), "crasher", logs::add)
 
-        assertTrue(action is Action.Move)
+        assertTrue(decision.action is Action.Move)
+        assertTrue(decision.isShakeUp)
         assertTrue(logs.isEmpty())
         executor.shutdown()
     }
@@ -186,9 +188,10 @@ class GameEngineTest {
         val executor = BotExecutor(shakeUpEveryTicks = 25)
         val logs = mutableListOf<String>()
 
-        val action = executor.decideSafely(WaitingBrain("Warter"), dummySensors(tick = 24), "warter", logs::add)
+        val decision = executor.decideSafely(WaitingBrain("Warter"), dummySensors(tick = 24), "warter", logs::add)
 
-        assertEquals(Action.Wait, action)
+        assertEquals(Action.Wait, decision.action)
+        assertTrue(!decision.isShakeUp)
         executor.shutdown()
     }
 
@@ -257,6 +260,22 @@ class GameEngineTest {
 
         assertTrue(!targetState.alive)
         assertEquals(10, ticks)
+    }
+
+    @Test
+    fun `Shake-up-Tick wird im Protokoll mit R markiert`() {
+        // shakeUpEveryTicks=1 erzwingt an JEDEM Tick eine Zufallsbewegung statt
+        // WaitingBrain.decide() aufzurufen - so ist der Marker deterministisch prüfbar.
+        val engine = GameEngine(
+            arenaWidth = 10, arenaHeight = 10, maxTicks = 1,
+            botExecutor = BotExecutor(shakeUpEveryTicks = 1)
+        )
+        engine.startMatch(listOf(WaitingBrain("Ziel"), WaitingBrain("Schuetze")))
+        val logs = mutableListOf<String>()
+
+        engine.step(logs::add)
+
+        assertTrue(logs.any { it.contains("bewegt sich") && it.endsWith(" R") })
     }
 
     // ---------- GameEngine.result() ----------

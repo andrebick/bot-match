@@ -217,7 +217,7 @@ class GameEngine(
         val snapshot = states.values.toList()
         val aliveSnapshot = snapshot.filter { it.alive }
 
-        val actions = aliveSnapshot.associate { robot ->
+        val decisions = aliveSnapshot.associate { robot ->
             val brain = brainById.getValue(robot.id)
             val sensors = Sensors(
                 self = robot,
@@ -228,6 +228,7 @@ class GameEngine(
             )
             robot.id to botExecutor.decideSafely(brain, sensors, robot.id, onLog)
         }
+        val actions = decisions.mapValues { (_, decision) -> decision.action }
 
         if (aliveSnapshot.isNotEmpty()) onLog("--- Tick $tick ---")
 
@@ -246,7 +247,10 @@ class GameEngine(
                 is Action.Shoot -> "schießt nach ${action.direction} (${position.x},${position.y})"
                 is Action.Wait -> "wartet (${position.x},${position.y})"
             }
-            onLog("${robot.teamName} $description")
+            // "R" markiert eine vom Framework erzwungene Shake-up-Zufallsbewegung
+            // (siehe BotExecutor), damit sie im Protokoll nicht wie eigene Bot-Logik aussieht.
+            val shakeUpSuffix = if (decisions.getValue(robot.id).isShakeUp) " R" else ""
+            onLog("${robot.teamName} $description$shakeUpSuffix")
         }
 
         val shotRequests = actions.mapNotNull { (id, action) ->

@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 
 /**
@@ -47,7 +48,7 @@ fun LogPanel(logEntries: List<String>, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxSize().border(1.dp, Color.LightGray).background(Color(0xFFFAFAFA))
             ) {
                 items(displayEntries) { entry ->
-                    Text(text = entry, modifier = Modifier.padding(2.dp))
+                    Text(text = entry, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(2.dp))
                 }
             }
         }

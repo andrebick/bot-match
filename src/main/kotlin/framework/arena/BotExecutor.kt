@@ -8,6 +8,14 @@ import java.util.concurrent.TimeoutException
 import kotlin.random.Random
 
 /**
+ * Ergebnis von [BotExecutor.decideSafely]: die tatsächlich auszuführende [action]
+ * plus die Info, ob sie vom Framework selbst erzwungen wurde (Shake-up), statt
+ * aus [RobotBrain.decide] zu stammen. Wird fürs Protokoll gebraucht, damit
+ * Zwangsbewegungen dort erkennbar sind und nicht wie eigene Bot-Logik aussehen.
+ */
+data class BotDecision(val action: Action, val isShakeUp: Boolean = false)
+
+/**
  * Ruft [RobotBrain.decide] geschützt auf: Schülercode kann eine Endlosschleife,
  * eine Exception oder einen StackOverflowError enthalten - das darf niemals die
  * ganze App einfrieren oder abstürzen lassen.
@@ -50,22 +58,23 @@ class BotExecutor(
      * den Rest des Matches "eingefroren" (liefert nur noch Wait, ohne decide()
      * überhaupt noch aufzurufen - so sammeln sich keine weiteren hängenden Threads an).
      */
-    fun decideSafely(brain: RobotBrain, sensors: Sensors, botId: String, onLog: (String) -> Unit): Action {
-        if (botId in frozen) return Action.Wait
+    fun decideSafely(brain: RobotBrain, sensors: Sensors, botId: String, onLog: (String) -> Unit): BotDecision {
+        if (botId in frozen) return BotDecision(Action.Wait)
 
         // Anti-Hänger: alle shakeUpEveryTicks Ticks eine erzwungene Zufallsbewegung,
         // damit sich wiederholende Blockaden (z.B. zwei Bots wollen dauerhaft aufs
         // selbe Feld) aufgelöst werden. Move statt Shoot/Wait, weil nur eine
         // Positionsänderung die Blockade tatsächlich bricht.
         if (shakeUpEveryTicks > 0 && sensors.tick > 0 && sensors.tick % shakeUpEveryTicks == 0) {
-            return Action.Move(Direction.entries[Random.nextInt(Direction.entries.size)])
+            val action = Action.Move(Direction.entries[Random.nextInt(Direction.entries.size)])
+            return BotDecision(action, isShakeUp = true)
         }
 
         val future = executor.submit(Callable { brain.decide(sensors) })
         return try {
             val action = future.get(timeoutMs, TimeUnit.MILLISECONDS)
             consecutiveTimeouts[botId] = 0
-            action
+            BotDecision(action)
         } catch (e: TimeoutException) {
             // Wir brechen den hängenden Task NICHT hart ab (interrupt() würde bei
             // einer CPU-Schleife ohnehin nichts bewirken) - wir ignorieren ihn einfach
@@ -77,12 +86,12 @@ class BotExecutor(
                 frozen += botId
                 onLog("${brain.name}: 3x hintereinander zu langsam -> für den Rest des Matches eingefroren")
             }
-            Action.Wait
+            BotDecision(Action.Wait)
         } catch (e: Throwable) {
             // Fängt bewusst Throwable (nicht nur Exception), damit auch
             // StackOverflowError o.ä. aus Schülercode nicht die App mitreißt.
             onLog("${brain.name}: Fehler in decide(): ${e::class.simpleName}: ${e.message} -> Wait")
-            Action.Wait
+            BotDecision(Action.Wait)
         }
     }
 
