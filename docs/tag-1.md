@@ -17,7 +17,7 @@ Teil dieses Kurses). Tag 1 läuft daher nur 9:00–13:00 ohne Mittagspause. Angr
 
 Dozentengeführt, alle Teams gemeinsam. Ausführliches Begleitmaterial siehe
 [tag-1-framework-walkthrough.md](tag-1-framework-walkthrough.md) (Inhalte) und
-[tag-1-praesentation.md](tag-1-praesentation.md) (Präsentationsform):
+[tag-1-framework-praesentation.md](tag-1-framework-praesentation.md) (Präsentationsform):
 
 1. App einmal live starten (`./gradlew run`), Beispiel-Bots (`RandomBot` vs. `ChaserBot`) gegeneinander laufen lassen — Schüler sehen live, was am Ende funktionieren soll.
 2. Domain-Modell erklären anhand von `Models.kt`: `Direction`, `Position`, `RobotState`, `Sensors`, `Action`, `RobotBrain`. Betonen: **Schüler schreiben nur `decide()`**, alles andere ist fertig.
