@@ -8,6 +8,7 @@ import framework.arena.Action
 import framework.arena.Direction
 import framework.arena.RobotBrain
 import framework.arena.Sensors
+import kotlin.math.abs
 
 /** Startpunkt für euren eigenen Bot - benennt/erweitert diese Klasse nach Belieben. */
 class MeinBot(override val name: String = "Team A - SkibidiTerminator") : RobotBrain {
@@ -18,32 +19,48 @@ class MeinBot(override val name: String = "Team A - SkibidiTerminator") : RobotB
         println (sensors.self.position)
 
 
-        val gegner1 = sensors.others.get(0)
+
+        val MeinX = sensors.self.position.x
+        val MeinY = sensors.self.position.y
+        val gegner = sensors.others.get(0)
+        var ziel = sensors.others.get(0)
+        var opfer = abs(gegner.position.x - MeinX) + abs(gegner.position.y - MeinY)
+        for (gegner in sensors.others) {
+            val abstand = abs(gegner.position.x - MeinX) + abs(gegner.position.y - MeinY)
+            if (abstand < opfer){
+                opfer = abstand
+                ziel = gegner
+
+            }
+        }
+        var wenigsteHp = ziel.health
+        for (gegner in sensors.others) {
+            if (gegner.health < wenigsteHp){
+                wenigsteHp = gegner.health
+                ziel = gegner
+            }
+        }
         val x = sensors.self.position.x
         val y = sensors.self.position.y
-        println(gegner1)
-        if (gegner1.position.x == sensors.self.position.x){
-            if (gegner1.position.y > sensors.self.position.y)
+        println(gegner)
+        if (gegner.position.x == sensors.self.position.x){
+            if (gegner.position.y > sensors.self.position.y)
                 return Action.Shoot(Direction.SOUTH)
             else {
                 return Action.Shoot(Direction.NORTH)
             }
         }
-        if (gegner1.position.y == sensors.self.position.y){
-            if (gegner1.position.x > sensors.self.position.x)
+        if (gegner.position.y == sensors.self.position.y){
+            if (gegner.position.x > sensors.self.position.x)
                 return Action.Shoot(Direction.EAST)
             else {
                 return Action.Shoot(Direction.WEST)
             }
         }
 
-
-
-        if (gegner1.position.y == sensors.self.position.y) {
+        if (gegner.position.y == sensors.self.position.y) {
             return Action.Shoot(direction)
         }
-
-
 
         if (x < 5) {
             direction = Direction.WEST
