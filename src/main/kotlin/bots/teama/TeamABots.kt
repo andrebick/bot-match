@@ -78,7 +78,7 @@ class MeinBot(override val name: String = "Team A - SkibidiTerminator") : RobotB
         val self = sensors.self.position
         val ausgerichtete = sensors.others.filter { istAusgerichtet(self, it.position) }
 
-        val bestesZiel = ausgerichtete.minByOrNull { it.health }
+        val bestesZiel = ausgerichtete.minWithOrNull(priorisierung)
         if (bestesZiel != null && sensors.self.health >= bestesZiel.health) {
             return Action.Shoot(richtungZu(self, bestesZiel.position))
         }
@@ -106,6 +106,10 @@ class MeinBot(override val name: String = "Team A - SkibidiTerminator") : RobotB
         )
         return Action.Move((beste ?: kandidaten.first()).first)
     }
+
+    /** Team B zuerst anvisieren, bei Gleichstand den schwächsten Gegner. */
+    val priorisierung: Comparator<RobotState> =
+        compareBy<RobotState> { !it.teamName.contains("Team B") }.thenBy { it.health }
 
     fun distanz(a: Position, b: Position): Int = abs(a.x - b.x) + abs(a.y - b.y)
 
