@@ -1,5 +1,4 @@
 package bots.teamb
-package bots.teamb
 
 import framework.arena.Action
 import framework.arena.Direction
@@ -9,7 +8,7 @@ import framework.arena.RobotState
 import framework.arena.Sensors
 import kotlin.math.abs
 
-class MeinBot(override val name: String = "Team B - Mr Nonchalant") : RobotBrain {
+class MeinBot(override val name: String = "O L IS E - Mr Nonchalant") : RobotBrain {
 
     private val zielPunkt = Position(0, 0)
     private val schussReichweite = 4
