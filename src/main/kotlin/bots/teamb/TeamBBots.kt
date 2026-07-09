@@ -9,7 +9,7 @@ import framework.arena.RobotState
 import framework.arena.Sensors
 import kotlin.math.abs
 
-class MeinBot(override val name: String = "Team B - Galaxy Voyager") : RobotBrain {
+class MeinBot(override val name: String = "Team B - Mr Nonchalant") : RobotBrain {
 
     private val zielPunkt = Position(0, 0)
     private val schussReichweite = 4
