@@ -56,9 +56,10 @@ class MeinBot(override val name: String = "Team Winner - BummsBot") : RobotBrain
             if (dy > 0) Direction.SOUTH else Direction.NORTH
         }
 
-        // Bei kritischem HP-Stand und Gegner in unmittelbarer Nähe lieber
-        // zurückweichen als weiter in die Gefahr zu laufen.
-        val fluchtnoetig = sensors.self.health <= 20 && kleinsterAbstand <= 2
+        // Bei kritischem HP-Stand und IRGENDEINEM Gegner in unmittelbarer Nähe
+        // (nicht nur dem nächsten) lieber zurückweichen als weiter in die Gefahr zu laufen.
+        val gefahrNah = sensors.others.any { abstand(self, it.position) <= 2 }
+        val fluchtnoetig = sensors.self.health <= 20 && gefahrNah
         return Action.Move(if (fluchtnoetig) richtungZumGegner.gegenteil() else richtungZumGegner)
     }
 
