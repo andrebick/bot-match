@@ -34,7 +34,7 @@ class MeinBot(override val name: String = "Team Winner - BummsBot") : RobotBrain
         }
 
         // Kein Ziel in gerader Linie -> zum nächsten Gegner vorrücken.
-        var gegner = sensors.others[0]
+        var gegner = sensors.others[1 ]
         var kleinsterAbstand = abstand(self, gegner.position)
         for (kandidat in sensors.others) {
             val d = abstand(self, kandidat.position)
