@@ -15,11 +15,13 @@ import kotlin.math.abs
 /** Startpunkt für euren eigenen Bot - benennt/erweitert diese Klasse nach Belieben. */
 class MeinBot(override val name: String = "Team A - SkibidiTerminator") : RobotBrain {
 
+    private val fluchtGrenze = 40
+
     override fun decide(sensors: Sensors): Action {
         if (sensors.others.size <= 1) {
             return eleminiereLetztenGegner(sensors)
         }
-        return taktischerZug(sensors)
+        return zurückhaltenderZug(sensors)
     }
 
     // ---------- Endgame: nur noch ein Gegner übrig ----------
@@ -34,14 +36,50 @@ class MeinBot(override val name: String = "Team A - SkibidiTerminator") : RobotB
         return Action.Move(schrittRichtungZu(self, gegner.position))
     }
 
+    // ---------- Mehrere Gegner: zurückhaltend spielen, andere kämpfen lassen ----------
+
+    /** Unter [fluchtGrenze] HP: fliehen. Sonst nur bei sicherem Trade schießen, sonst abwarten/ausweichen. */
+    fun zurückhaltenderZug(sensors: Sensors): Action {
+        if (sensors.self.health < fluchtGrenze) {
+            return fliehen(sensors)
+        }
+        return taktischerZug(sensors)
+    }
+
+    /** Bewegt sich dorthin, wo kein Gegner in Schusslinie steht und der Abstand zum nächsten Gegner maximal ist. */
+    fun fliehen(sensors: Sensors): Action {
+        val self = sensors.self.position
+        val kandidaten = Direction.entries.mapNotNull { richtung ->
+            val ziel = self.moved(richtung)
+            if (ziel.x !in 0 until sensors.arenaWidth || ziel.y !in 0 until sensors.arenaHeight) return@mapNotNull null
+            richtung to ziel
+        }
+        if (kandidaten.isEmpty()) return gehInDieEcke(sensors)
+
+        val beste = kandidaten.minWithOrNull(
+            compareBy(
+                { (_, ziel) -> bedrohungAn(ziel, sensors.others) },
+                { (_, ziel) -> -nächsteGegnerDistanz(ziel, sensors.others) }
+            )
+        )
+        return Action.Move((beste ?: kandidaten.first()).first)
+    }
+
+    fun nächsteGegnerDistanz(position: Position, gegner: List<RobotState>): Int =
+        gegner.minOfOrNull { distanz(position, it.position) } ?: 0
+
     // ---------- Mehrere Gegner: Trade abwägen oder Bedrohung minimieren ----------
 
+    /**
+     * Schießt bei jeder Ausrichtung, bei der kein klarer Nachteil droht - sonst positioniert
+     * er sich nur sicher und lässt die Gegner sich zuerst gegenseitig abnutzen.
+     */
     fun taktischerZug(sensors: Sensors): Action {
         val self = sensors.self.position
         val ausgerichtete = sensors.others.filter { istAusgerichtet(self, it.position) }
 
         val bestesZiel = ausgerichtete.minByOrNull { it.health }
-        if (bestesZiel != null) {
+        if (bestesZiel != null && sensors.self.health >= bestesZiel.health) {
             return Action.Shoot(richtungZu(self, bestesZiel.position))
         }
 
@@ -87,18 +125,14 @@ class MeinBot(override val name: String = "Team A - SkibidiTerminator") : RobotB
         return if (ziel.x > self.x) Direction.EAST else Direction.WEST
     }
 
-    /**
-     * Bewegungsrichtung von [self] Richtung [ziel]. Gleicht zuerst die Reihe (y) an,
-     * damit möglichst früh eine Ausrichtung entsteht (schussbereit), statt lange
-     * ungeschützt direkt auf den Gegner zuzulaufen.
-     */
+    /** Bewegungsrichtung von [self] Richtung [ziel], größere Achse zuerst. */
     fun schrittRichtungZu(self: Position, ziel: Position): Direction {
         val dx = ziel.x - self.x
         val dy = ziel.y - self.y
-        return if (dy != 0) {
-            if (dy > 0) Direction.SOUTH else Direction.NORTH
-        } else {
+        return if (abs(dx) >= abs(dy)) {
             if (dx > 0) Direction.EAST else Direction.WEST
+        } else {
+            if (dy > 0) Direction.SOUTH else Direction.NORTH
         }
     }
 
