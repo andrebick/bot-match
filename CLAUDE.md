@@ -10,7 +10,7 @@ Kotlin/Compose-Desktop-App für ein 3-Tage-Schülerpraktikum (10. Klasse, Kotlin
 
 - Kotlin 2.0.21 (JVM, kein Multiplatform-Target — Desktop-only)
 - Compose Multiplatform 1.7.3 (`org.jetbrains.compose`) + `org.jetbrains.kotlin.plugin.compose` 2.0.21 (Compose-Compiler-Plugin muss exakt die Kotlin-Version matchen)
-- Gradle 8.6, JVM Toolchain 21
+- Gradle 8.6, JVM Toolchain 21 (`settings.gradle.kts` bindet den `foojay-resolver-convention`-Plugin ein, damit Gradle bei Bedarf automatisch ein JDK 21 herunterlädt — Praktikumsrechner brauchen daher nur ein JDK 17 als Basis)
 - JUnit 5 für Engine-Tests
 
 ## Architektur
@@ -18,6 +18,7 @@ Kotlin/Compose-Desktop-App für ein 3-Tage-Schülerpraktikum (10. Klasse, Kotlin
 ```
 framework/arena/   Reine JVM-Logik, KEINE Compose-Abhängigkeit
   Models.kt          Direction, Position, RobotState, Sensors, Action, RobotBrain
+  Toolkit.kt          Extension-Functions für Schüler-Bots (Distanz, Richtung, Gegnersuche, Arena-Geometrie) — siehe docs/toolkit-referenz.md
   BotExecutor.kt      Führt RobotBrain.decide() sicher aus (Timeout + Crash-Schutz)
   GameEngine.kt       Tick-Loop, resolveMoves()/resolveShots() (reine Funktionen), Match-State
   BotRegistry.kt      Fasst alle bots.teamX.teamXBots + bots.examples zusammen
@@ -62,6 +63,7 @@ Bot-IDs sind `"bot-0"`, `"bot-1"`, ... in Reihenfolge der `brains`-Liste bei `st
 - **Kein Team-/Friendly-Fire-Konzept.** `RobotState.teamName` wird 1:1 aus `RobotBrain.name` übernommen. Die Gruppierung in `BotRegistry.allTeams` (Team A/B/C) ist rein organisatorisch für UI-Anzeige und Backlog — spielerisch ist es ein reines Free-for-all, jeder Bot kämpft für sich. Das ist bewusst so gewählt, um die Engine einfach zu halten; falls das erweitert werden soll, betrifft das `resolveShots()` in `GameEngine.kt`.
 - **`RobotState.alive` ist eine abgeleitete Property** (`health > 0`), kein gespeichertes Feld — verhindert inkonsistente Zustände über `copy()` (z.B. `health = 0` ohne `alive` nachzuziehen).
 - **Startpositionen werden am Arena-Perimeter berechnet (`computeStartPositions`, deterministisch, kein `Random`) und dann in `startMatch()` zufällig auf die Bots verteilt (`.shuffled()`).** Die deterministische Berechnung bleibt isoliert testbar (Engine-Tests), das Shuffling sorgt dafür, dass nicht z.B. immer `bot-0` denselben Startplatz bekommt.
+- **`Toolkit.kt` ist bewusst eine Sammlung von Top-Level-Extension-Functions, keine Klasse/Objekt.** Grund: Schüler sollen `sensors.nearestEnemy()` bzw. `self.directionTo(ziel)` schreiben können, ohne zusätzliche Objekt-Instanz oder Static-Import-Gymnastik — ein einziger `import framework.arena.*` reicht, weil die Funktionen im selben Package wie `Models.kt` liegen. Der Zweck der Bibliothek ist ausschließlich, Raster-/Distanzrechnung von den Schülern fernzuhalten (Manhattan-Distanz, Vorzeichen-Dreh beim Fliehen, Sichtlinien-Check), nicht ein neues Architektur-Konzept einzuführen.
 
 ## Schüler-Bot-Konvention
 

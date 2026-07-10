@@ -21,6 +21,7 @@ zurückgeben muss.
 | `Sensors` | Alles, was euer Bot in einem Tick über die Welt sehen darf (siehe unten). |
 | `Action` | Was euer Bot tun will: `Move`, `Shoot` oder `Wait`. Genau eine pro Tick. |
 | `RobotBrain` | Das Interface, das eure Bot-Klasse implementiert — `decide()` ist eure einzige Aufgabe. |
+| `Toolkit.kt` | Fertige Helferfunktionen (Distanz, Richtung, Gegnersuche, Rand/Mitte) für `decide()` — siehe [`toolkit-referenz.md`](toolkit-referenz.md). |
 
 ## Der Ablauf in einem Satz
 

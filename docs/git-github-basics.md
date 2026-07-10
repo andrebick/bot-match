@@ -1,8 +1,9 @@
 # Git & GitHub — kurz erklärt
 
-Dieses Praktikum nutzt selbst **kein** Git (siehe Hinweis unten) — trotzdem lohnt
-sich ein kurzer Überblick, weil Git/GitHub euch in fast jedem Programmier-Kontext
-wieder begegnen werden. Diese Seite gibt nur die Grundidee, keine Detailtiefe.
+Dieses Praktikum nutzt tatsächlich Git (siehe "So läuft es in unserem Praktikum
+ab" weiter unten) — ein kurzer Überblick über die Grundbegriffe lohnt sich also
+doppelt, weil euch Git/GitHub außerdem in fast jedem Programmier-Kontext wieder
+begegnen werden. Diese Seite gibt nur die Grundidee, keine Detailtiefe.
 
 ## Warum überhaupt?
 
@@ -77,14 +78,70 @@ Repository (Projektordner)
            └── Pull Request → Bitte in main übernehmen
 ```
 
-## Warum wir das im Praktikum (noch) nicht so nutzen
+## Der Ablauf als Bild: main, Branch, Merge
 
-In diesem 3-Tage-Praktikum arbeitet jedes Team direkt in seinem eigenen Ordner
-(`bots/teamX/`), ohne Git — das hält den Fokus auf dem Kotlin-Lernen und vermeidet
-zusätzliche Werkzeug-Einarbeitung in kurzer Zeit. Die Integration am Turniertag
-macht der Dozent manuell. Das ist eine bewusste Vereinfachung für dieses Praktikum,
-kein Zeichen dafür, dass Git nicht wichtig wäre — in echten Software-Projekten (auch
-kleinen) ist es praktisch immer im Einsatz.
+Der Baum-Vergleich von oben noch einmal als Zeitachse — `main` läuft
+durchgehend nach rechts, der Feature-Branch zweigt kurz ab und wird am Ende
+wieder zusammengeführt:
+
+<img src="images/git-branch-merge.png" alt="Zeitachse: main-Branch läuft durchgehend, ein Feature-Branch zweigt an einem Commit ab, sammelt eigene Commits, und wird per Pull Request wieder in main gemergt" width="750">
+
+Die drei Schritte im Bild:
+
+1. **Branch erstellen** — an einem bestimmten Commit auf `main` zweigt ihr ab
+   (`git checkout -b angriffslogik`). Ab hier laufen `main` und euer Branch
+   getrennt weiter.
+2. **Commits auf dem Branch** — ihr arbeitet wie gewohnt (Datei ändern,
+   Commit, Datei ändern, Commit), nur dass diese Commits erst mal nur auf
+   eurem Branch existieren, nicht auf `main`.
+3. **Merge über Pull Request** — ist der Branch fertig, öffnet ihr einen Pull
+   Request. Nach dem Review werden alle Commits eures Branches in `main`
+   übernommen (gemergt). `main` enthält danach alles, was vorher nur auf dem
+   Feature-Branch war — der Branch selbst kann anschließend gelöscht werden,
+   seine Commits bleiben in der Geschichte von `main` erhalten.
+
+**Wichtig:** Während ihr auf eurem Branch arbeitet, bleibt `main` unverändert.
+Andere Teammitglieder, die von `main` aus weiterarbeiten, sehen eure
+Zwischenstände nicht, bis der Merge passiert ist — genau das macht es
+möglich, parallel an verschiedenen Features zu arbeiten, ohne sich gegenseitig
+kaputte Zwischenstände unterzuschieben.
+
+## So läuft es in unserem Praktikum ab
+
+Anders als der einfache `main`/Feature-Branch-Fall oben gibt es hier **einen
+Basis-Branch pro Praktikums-Durchlauf** (nicht `main` selbst) und **einen
+Branch pro Team**, der von diesem Basis-Branch abzweigt:
+
+1. **Vor dem Praktikum** legt der Dozent einen Basis-Branch für diesen
+   Durchlauf an, z.B. `student-2026_07` (Namensschema: Jahr_Monat des
+   Termins — für jeden neuen Praktikums-Termin ein neuer Basis-Branch).
+2. **Am Anfang** erstellt jedes Team über IntelliJ einen eigenen Branch von
+   diesem Basis-Branch aus, benannt nach Team-Kürzel: `student-2026_07-A`,
+   `student-2026_07-B`, `student-2026_07-C`.
+3. **Während der Arbeit** committet und pusht jedes Team seinen Fortschritt
+   selbst, sobald eine Story fertig ist — nicht erst ganz am Ende. So bleibt
+   der eigene Branch (`student-2026_07-A` etc.) laufend aktuell und nichts
+   geht verloren.
+4. **Am Ende des Tages** öffnet jedes Team einen Pull Request von seinem
+   Team-Branch zurück auf den Basis-Branch (`student-2026_07`) — das
+   übernimmt in der Praxis meist der Dozent, damit alle drei Teams
+   zuverlässig und zur gleichen Zeit gemergt werden.
+5. Sind alle drei Pull Requests gemergt, enthält der Basis-Branch
+   `student-2026_07` den Stand aller drei Teams zusammen — genau darauf
+   lässt sich am Ende des Tages das gemeinsame Testduell/Battle-Royale
+   starten.
+
+Am nächsten Tag geht es auf dem eigenen Team-Branch weiter (der lebt über
+alle drei Tage), bis am letzten Tag der finale Merge aller drei Branches in
+`student-2026_07` das Turnier-Finale vorbereitet.
+
+```
+student-2026_07 (Basis-Branch für diesen Durchlauf)
+ ├── student-2026_07-A ── Commits von Team A, täglich gepusht
+ ├── student-2026_07-B ── Commits von Team B, täglich gepusht
+ └── student-2026_07-C ── Commits von Team C, täglich gepusht
+      └── Pull Request je Team, am Ende jedes Tages → zurück nach student-2026_07
+```
 
 ## Wenn ihr selbst ausprobieren wollt
 

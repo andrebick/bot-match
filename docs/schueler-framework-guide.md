@@ -116,23 +116,16 @@ if (gegner == null) {
 }
 ```
 
-Beispiel — den nächstgelegenen Gegner finden (Abstand grob über
-x-Differenz + y-Differenz gerechnet, das nennt man Manhattan-Distanz):
+Für Fragen wie "wer ist der nächste Gegner?" oder "wer hat am wenigsten HP?"
+müsst ihr nicht selbst rechnen — dafür gibt es fertige Toolkit-Funktionen:
 
 ```kotlin
-import kotlin.math.abs
-
-val naechsterGegner = sensors.others.minByOrNull { gegner ->
-    abs(gegner.position.x - sensors.self.position.x) +
-        abs(gegner.position.y - sensors.self.position.y)
-}
+val naechsterGegner = sensors.nearestEnemy()      // null, wenn keiner mehr lebt
+val schwaechsterGegner = sensors.weakestEnemy()   // null, wenn keiner mehr lebt
 ```
 
-Beispiel — den schwächsten Gegner finden (wenigste HP):
-
-```kotlin
-val schwaechsterGegner = sensors.others.minByOrNull { it.health }
-```
+Volle Übersicht aller Helferfunktionen (Distanz, Richtung, Sichtlinie,
+Rand/Mitte, ...): [`toolkit-referenz.md`](toolkit-referenz.md).
 
 ---
 
@@ -221,7 +214,103 @@ eigene Logik wiederverwenden könnt:
 
 ---
 
-## 4. Bot testen
+## 4. Ein Bot, Schritt für Schritt aufgebaut
+
+Die Bausteine von oben ergeben zusammengesetzt einen immer fähigeren Bot — hier
+als Ausbaustufen, jede baut auf der vorherigen auf.
+
+### Stufe 0 — nichts tun
+
+```kotlin
+override fun decide(sensors: Sensors): Action {
+    return Action.Wait
+}
+```
+
+Der einfachste mögliche Bot. Macht nichts, verliert aber auch nie durch eigene
+dumme Züge.
+
+### Stufe 1 — zufällig bewegen
+
+```kotlin
+override fun decide(sensors: Sensors): Action {
+    val richtung = Direction.entries.random()
+    return Action.Move(richtung)
+}
+```
+
+`Direction.entries` ist die Liste aller vier Richtungen, `.random()` wählt eine
+zufällig aus. Das entspricht der ersten Backlog-Story (1.1).
+
+### Stufe 2 — immer in eine feste Richtung schießen
+
+```kotlin
+override fun decide(sensors: Sensors): Action {
+    return Action.Shoot(Direction.EAST)
+}
+```
+
+Einfach, aber trifft nur Gegner, die zufällig genau östlich von euch in derselben
+Zeile stehen.
+
+### Stufe 3 — auf einen Gegner in Sichtlinie zielen
+
+Für "steht er in meiner Zeile/Spalte?" und "in welche Richtung schießen?" müsst
+ihr nicht selbst mit `x`/`y` vergleichen — dafür gibt es passende
+Toolkit-Funktionen (volle Übersicht: [`toolkit-referenz.md`](toolkit-referenz.md)):
+
+```kotlin
+override fun decide(sensors: Sensors): Action {
+    val gegner = sensors.nearestEnemy() ?: return Action.Wait
+
+    return if (sensors.canShoot(gegner)) {
+        // gleiche Zeile oder Spalte — canShoot() prüft das für uns
+        Action.Shoot(sensors.self.position.directionTo(gegner.position)!!)
+    } else {
+        Action.Move(Direction.SOUTH)   // sonst irgendwie bewegen
+    }
+}
+```
+
+`sensors.canShoot(gegner)` prüft, ob der Gegner in derselben Zeile oder Spalte
+steht, und `directionTo` liefert die passende Schussrichtung dazu — deshalb ist
+das `!!` hier sicher, `directionTo` gibt nur bei nicht ausgerichteten Positionen
+`null` zurück. Sonst bewegt sich der Bot (hier fest nach Süden — das ließe sich
+noch verbessern, z.B. mit `approachDirectionTo` in Richtung des Gegners laufen
+statt fest nach Süden).
+
+### Stufe 4 — bei niedriger Gesundheit fliehen
+
+```kotlin
+override fun decide(sensors: Sensors): Action {
+    val gegner = sensors.nearestEnemy() ?: return Action.Wait
+    val self = sensors.self.position
+
+    if (sensors.self.health < 20) {
+        // fliehen: in die Richtung weg vom Gegner laufen
+        return Action.Move(self.fleeDirectionFrom(gegner.position)!!)
+    }
+
+    // sonst normal angreifen wie in Stufe 3
+    return if (sensors.canShoot(gegner)) {
+        Action.Shoot(self.directionTo(gegner.position)!!)
+    } else {
+        Action.Move(Direction.SOUTH)
+    }
+}
+```
+
+Fragt zuerst die eigene Gesundheit ab (`sensors.self.health < 20`) und verhält sich
+dann komplett anders. `fleeDirectionFrom` übernimmt dabei das
+Vorzeichen-Dreh-Problem (weg statt hin) komplett — ihr müsst weder `abs()` noch
+Vergleiche zwischen `x`/`y`-Werten selbst schreiben. Das ist das Grundmuster für
+Story 1.3 und für Story 3.1 (Zustandsmaschine — euer Bot verhält sich
+unterschiedlich, je nachdem "in welchem Zustand" er gerade ist, ähnlich einer
+Ampel).
+
+---
+
+## 5. Bot testen
 
 ```bash
 ./gradlew run
@@ -235,7 +324,7 @@ passiert.
 das Spiel stürzt deswegen nicht ab. Euer Bot macht in dem Fall einfach `Wait`, bis
 ihr den Fehler behoben und neu gestartet habt.
 
-## 5. Häufige Anfängerfehler
+## 6. Häufige Anfängerfehler
 
 - **Neue Bot-Klasse angelegt, aber nicht in `teamXBots` eingetragen** → Bot
   compiliert, taucht aber nicht in der App-Auswahl auf.

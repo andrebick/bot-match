@@ -10,13 +10,13 @@ Letztes Daily des Sprints. Fokus: "Was fehlt noch bis zur finalen Bot-Version (S
 
 - Letzte Anpassungen an der eigenen Bot-Logik.
 - Story 5.1 (Finale Bot-Version festlegen) abschließen: `teamXBots`-Liste enthält genau die Bots, die antreten sollen.
-- Dozent sammelt final alle drei `bots/teamX/`-Ordner ein (falls nicht schon an Tag 2 geschehen) und kopiert sie in sein eigenes Projekt.
+- Jedes Team committet und pusht seinen finalen Stand auf den eigenen Team-Branch (falls nicht schon geschehen).
 
 ## 10:45–11:00 Pause
 
 ## 11:00–12:00 — Arbeitsblock 2: Integration
 
-- Dozent führt `./gradlew build` mit allen drei integrierten Team-Ordnern aus, behebt eventuelle Compile-Konflikte (z.B. doppelte Klassennamen zwischen Teams — sollte durch getrennte Packages `bots.teama/b/c` nicht vorkommen, aber sicherheitshalber prüfen).
+- Dozent mergt die drei finalen Pull Requests (Team-Branches → Basis-Branch, siehe [`docs/git-github-basics.md`](git-github-basics.md#so-läuft-es-in-unserem-praktikum-ab)) und führt danach `./gradlew build` auf dem Basis-Branch aus, behebt eventuelle Compile-Konflikte (z.B. doppelte Klassennamen zwischen Teams — sollte durch getrennte Packages `bots.teama/b/c` nicht vorkommen, aber sicherheitshalber prüfen).
 - Während der Integration: Teams bereiten ihre Strategie-Kurzvorstellung vor (Story 5.2, 1-2 Sätze).
 - Sobald Integration steht: kurzer technischer Probelauf (Dozent), damit während der Proberunden mit Schülern keine Überraschungen auftreten.
 
@@ -35,7 +35,7 @@ Letztes Daily des Sprints. Fokus: "Was fehlt noch bis zur finalen Bot-Version (S
 
 ## 14:45–15:00 — Sprint Review + Retrospektive
 
-**Sprint Review (siehe [scrum-board.md](scrum-board.md)):**
+**Sprint Review (siehe [scrum-board.md](dozent/scrum-board.md)):**
 - Jedes Team stellt seine Strategie kurz vor (Story 5.2).
 - Kurzes Feedback aus der Runde.
 
