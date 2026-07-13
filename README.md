@@ -4,7 +4,7 @@ Kotlin/Compose-Desktop-Projekt für ein Schülerpraktikum: Roboter kämpfen auf 
 
 Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material** (Zeitplan, Tagesprogramme, Backlog, Musterlösungen) liegt in [`docs/`](docs/).
 
-**Version 2** dieses Praktikums: gegenüber der ersten Durchführung wurde der Umfang bewusst vereinfacht (u.a. Toolkit-Bibliothek für Distanz-/Richtungsberechnung statt Handrechnung durch die Schüler), damit der Fokus stärker auf Kotlin- und OOP-Grundlagen bleibt statt auf zusätzlicher Mathematik.
+🔴 **Version 2** dieses Praktikums: gegenüber der ersten Durchführung wurde der Umfang bewusst vereinfacht (u.a. Toolkit-Bibliothek für Distanz-/Richtungsberechnung statt Handrechnung durch die Schüler), damit der Fokus stärker auf Kotlin- und OOP-Grundlagen bleibt statt auf zusätzlicher Mathematik.
 
 <img src="docs/images/screenshot.png" alt="Bot-Match Screenshot" width="600">
 
