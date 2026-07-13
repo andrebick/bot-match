@@ -1,8 +1,11 @@
-# Bot-Match — 3-Tage-Kotlin-Praktikum
+# Bot-Match 1.0 — 3 Tage Kotlin Praktikum für Schüler
 
 Kotlin/Compose-Desktop-Projekt für ein Schülerpraktikum: Roboter kämpfen auf einem 10×10-Raster gegeneinander. Schüler schreiben ausschließlich Bot-Entscheidungslogik (`RobotBrain.decide()`), das komplette Framework (Engine, Rendering, Kampf-Regeln) ist fertig.
 
 Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material** (Zeitplan, Tagesprogramme, Backlog, Musterlösungen) liegt in [`docs/`](docs/).
+
+> 🔴 **Version 1** dieses Praktikums: Erste Durchführung. Die Schüler hatten teilweise Probleme mit den "Berechnungen". Deshalb gibt es eine Version 2.0 (branch `simple`) wo die Anforderungen durch eine Toolkit-Bibliothek vereinfacht wurden.
+
 
 <img src="docs/images/screenshot.png" alt="Bot-Match Screenshot" width="600">
 
