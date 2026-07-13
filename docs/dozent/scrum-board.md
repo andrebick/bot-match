@@ -8,7 +8,7 @@ Ein gemeinsames physisches Board für alle drei Teams (Whiteboard oder Pinnwand 
 | Backlog | To Do | In Progress | Review (Pair-Check) | Done |
 ```
 
-- **Backlog:** alle noch nicht ausgewählten User Storys aus [backlog.md](backlog.md) (als Karten vorbereitet, siehe unten)
+- **Backlog:** alle noch nicht ausgewählten User Storys aus [backlog.md](../backlog.md) (als Karten vorbereitet, siehe unten)
 - **To Do:** von einem Team für die aktuelle Session ausgewählt
 - **In Progress:** wird gerade bearbeitet
 - **Review (Pair-Check):** fertig codiert, wird von einem zweiten Teammitglied gegengelesen/getestet, bevor sie als fertig gilt (das ist das im Kurs eingeführte Pair-Programming-/Review-Prinzip in Kurzform)

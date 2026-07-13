@@ -10,7 +10,8 @@ Details siehe [tag-1.md](tag-1.md), [tag-2.md](tag-2.md), [tag-3.md](tag-3.md).
 | Zeit | Block | Inhalt |
 |---|---|---|
 | 09:00–09:15 | Auftakt | Sprint Planning |
-| 09:15–10:45 | Arbeitsblock 1 | Framework-Walkthrough |
+| 09:15–09:30 | Kurz-Intro | Git & Gradle |
+| 09:30–10:45 | Arbeitsblock 1 | Framework-Walkthrough |
 | 10:45–11:00 | Pause | |
 | 11:00–12:45 | Arbeitsblock 2 | Erste Bots (Epic 1) |
 | 12:45–13:00 | Abschluss | Tagesrückblick |
@@ -37,15 +38,14 @@ Gleiches Raster an beiden Tagen, Inhalte unterscheiden sich:
 
 ## Sprint-Rahmen
 
-Der gesamte 3-Tage-Block ist **ein Sprint**. Sprint-Ziel: *"Jedes Team hat einen
-kampffähigen Bot mit mindestens zwei erkennbaren Verhaltensregeln (z.B. Angriff +
-Flucht)."*
+Der gesamte 3-Tage-Block ist **ein Sprint**. Sprint-Ziel: *"Bot mit mindestens
+zwei Verhaltensregeln, der ein Testduell übersteht."*
 
 - **Product Owner + Scrum Master:** Dozent
 - **Entwicklungsteams:** 3 Teams à 2-3 Schüler
-- **Board:** ein gemeinsames Board für alle drei Teams, siehe [scrum-board.md](scrum-board.md)
+- **Board:** ein gemeinsames Board für alle drei Teams, siehe [scrum-board.md](dozent/scrum-board.md)
 - **Sprint Planning:** Tag 1, 09:00–09:15 (kurz, da Backlog vorbereitet ist — Fokus auf Auswahl der ersten Storys, nicht auf Erstellung)
-- **Daily Standup:** Tag 2 und 3, jeweils 09:00–09:15, 3 Fragen pro Team-Vertreter (siehe scrum-board.md)
+- **Daily Standup:** Tag 2 und 3, jeweils 09:00–09:15, 3 Fragen pro Team-Vertreter (siehe dozent/scrum-board.md)
 - **Sprint Review:** Tag 3, 14:45–15:00 — Turnierergebnis + kurze Strategie-Vorstellung je Team
 - **Retrospektive:** direkt im Anschluss an das Review, kurz (5-10 Min), 2 Fragen: "Was lief gut?" / "Was würden wir nächstes Mal anders machen?"
 

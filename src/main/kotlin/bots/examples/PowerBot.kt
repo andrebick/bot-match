@@ -6,7 +6,11 @@ import framework.arena.Position
 import framework.arena.RobotBrain
 import framework.arena.RobotState
 import framework.arena.Sensors
-import kotlin.math.abs
+import framework.arena.approachDirectionTo
+import framework.arena.directionTo
+import framework.arena.enemiesInLineOfSight
+import framework.arena.manhattanDistanceTo
+import framework.arena.weakest
 
 /**
  * Der aggressivste Beispiel-Bot: kombiniert zwei Ideen, die in echten Kampf-KIs
@@ -21,7 +25,8 @@ import kotlin.math.abs
  *    Gesundheit gewählt (nahe UND schwache Gegner zuerst), nicht nur die
  *    nächste Distanz wie bei [ChaserBot]. Zum Ausrichten wird zuerst die
  *    x-Differenz geschlossen (gleiche Spalte anpeilen), dann geschossen -
- *    empirisch die stärkste der getesteten Annäherungsstrategien.
+ *    empirisch die stärkste der getesteten Annäherungsstrategien (bewusst
+ *    NICHT die "größere Achse zuerst"-Heuristik von [ChaserBot]/[FluchtBot]).
  *
  * Bewusst KEINE Flucht bei niedriger Gesundheit (anders als [FluchtBot]): gegen
  * einen Gegner mit identischem Bewegungsmuster (z.B. FluchtBot selbst) würde ein
@@ -46,65 +51,35 @@ class PowerBot(override val name: String = "PowerBot") : RobotBrain {
      *   priorisierte Ziel in Sichtlinie oder [Action.Move] zur Annäherung.
      */
     override fun decide(sensors: Sensors): Action {
-        val self = sensors.self
-        val enemies = sensors.others
-        if (enemies.isEmpty()) return Action.Wait
+        val self = sensors.self.position
+        if (sensors.others.isEmpty()) return Action.Wait
 
-        val alignedEnemies = enemies.filter { isAligned(self.position, it.position) }
-        if (alignedEnemies.isNotEmpty()) {
-            val weakest = alignedEnemies.minWithOrNull(
-                compareBy<RobotState> { it.health }.thenBy { manhattanDistance(self.position, it.position) }
-            )!!
-            return Action.Shoot(directionTo(self.position, weakest.position))
+        val weakestAligned = sensors.enemiesInLineOfSight().weakest()
+        if (weakestAligned != null) {
+            return Action.Shoot(self.directionTo(weakestAligned.position)!!)
         }
 
-        val target = bestTarget(self.position, enemies)
-        return moveTowardAlignment(self.position, target.position)
-    }
-
-    /**
-     * Prüft, ob [from] und [to] in derselben Reihe oder Spalte liegen - also ein
-     * Schuss in die richtige Richtung treffen würde.
-     */
-    private fun isAligned(from: Position, to: Position): Boolean =
-        from.x == to.x || from.y == to.y
-
-    /** Distanz auf dem Grid ohne Diagonalbewegung: Summe der Achsenabstände. */
-    private fun manhattanDistance(a: Position, b: Position): Int =
-        abs(a.x - b.x) + abs(a.y - b.y)
-
-    /**
-     * Leitet aus der relativen Lage von [to] zu [from] die Schussrichtung ab.
-     * Voraussetzung: [isAligned] für dasselbe Paar ist bereits `true`.
-     */
-    private fun directionTo(from: Position, to: Position): Direction {
-        return when {
-            from.x == to.x -> if (to.y < from.y) Direction.NORTH else Direction.SOUTH
-            else -> if (to.x > from.x) Direction.EAST else Direction.WEST
-        }
+        val target = bestTarget(sensors)
+        return moveTowardAlignment(self, target.position)
     }
 
     /** Score aus Distanz und Gesundheit: nahe UND schwache Gegner werden bevorzugt. */
-    private fun bestTarget(self: Position, enemies: List<RobotState>): RobotState =
-        enemies.minBy { manhattanDistance(self, it.position) + it.health / 10 }
+    private fun bestTarget(sensors: Sensors): RobotState =
+        sensors.others.minBy { it.position.manhattanDistanceTo(sensors.self.position) + it.health / 10 }
 
     /**
      * Schließt zuerst die x-Differenz (bewegt sich in die gleiche Spalte wie das
      * Ziel), erst danach die y-Differenz. Diese "Spalte zuerst"-Reihenfolge hat
      * sich in Testläufen gegen alle anderen Beispiel-Bots als die stärkste
-     * Ausricht-Strategie erwiesen.
-     *
-     * @param self eigene Position.
-     * @param target Zielposition, der angenähert werden soll.
-     * @return [Action.Move] Richtung x-Angleichung, oder falls `dx == 0`, y-Angleichung.
+     * Ausricht-Strategie erwiesen - deshalb bewusst kein
+     * [framework.arena.approachDirectionTo] (das würde die größere Achse zuerst wählen).
      */
     private fun moveTowardAlignment(self: Position, target: Position): Action {
         val dx = target.x - self.x
-        val dy = target.y - self.y
         return if (dx != 0) {
             Action.Move(if (dx > 0) Direction.EAST else Direction.WEST)
         } else {
-            Action.Move(if (dy > 0) Direction.SOUTH else Direction.NORTH)
+            Action.Move(self.approachDirectionTo(target)!!)
         }
     }
 }

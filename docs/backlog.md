@@ -2,7 +2,7 @@
 
 Gemeinsames Backlog für alle drei Teams. Jede Story hat Akzeptanzkriterien und Story Points (Planning-Poker-Skala 1/2/3/5 — 1 = trivial, 5 = anspruchsvoll für diese Gruppe). Reihenfolge der Epics ist eine Empfehlung, keine Pflicht-Sortierung.
 
-Für jede Story gibt es eine Musterlösung für den Dozenten in [`dozent/loesungen.md`](dozent/loesungen.md) (kompakt) bzw. [`dozent/loesungen_easy.md`](dozent/loesungen_easy.md) (geradlinig/anfängernah) — bitte nicht an Schüler weitergeben, bevor sie es selbst versucht haben.
+Für jede Story gibt es eine Musterlösung für den Dozenten in [`dozent/loesungen.md`](dozent/loesungen.md) — bitte nicht an Schüler weitergeben, bevor sie es selbst versucht haben.
 
 **Für Schüler:** Denkhilfen, Taktik-Gedanken und Leitfragen zu jeder Story (mit Bildern) stehen in [`story-hinweise.md`](story-hinweise.md). Dort nachschauen, wenn ihr an einer Story hängt.
 
@@ -15,9 +15,12 @@ interface RobotBrain {
 // sensors.self: eigener RobotState (position, health, alive)
 // sensors.others: alle anderen lebenden Roboter
 // sensors.arenaWidth / arenaHeight: Rastergröße (10x10)
+// sensors.tick: aktueller Tick-Zähler (ab 0)
 // Action: Move(Direction) | Shoot(Direction) | Wait
 // Direction: NORTH, EAST, SOUTH, WEST
 ```
+
+Für Distanz-, Richtungs- und Gegnersuche-Berechnungen (nächster Gegner, Fluchtrichtung, Sichtlinie, Rand/Mitte-Erkennung, ...) gibt es fertige Helferfunktionen — selbst herrechnen ist nicht nötig. Volle Übersicht: [`toolkit-referenz.md`](toolkit-referenz.md).
 
 ---
 
@@ -33,7 +36,7 @@ Als Team möchte ich, dass mein Bot sich bei jedem Tick in eine zufällige Richt
 - Der Bot ist in der Bot-Auswahl der App sichtbar und bewegt sich sichtbar über die Arena.
 
 ### Story 1.2 — Am Rand bleiben / Zentrum meiden
-**Story Points: 2**
+**Story Points: 1**
 
 Als Team möchte ich, dass mein Bot sich eher am Rand der Arena aufhält (schwerer zu treffen, wenn weniger Gegner in Reihe/Spalte kommen), damit er nicht sofort im Zentrum kampiert und leicht von mehreren Seiten getroffen wird.
 
@@ -42,14 +45,46 @@ Als Team möchte ich, dass mein Bot sich eher am Rand der Arena aufhält (schwer
 - Befindet sich der Bot zu nah am Zentrum, bewegt er sich in Richtung eines Randes.
 
 ### Story 1.3 — Flucht bei niedriger Gesundheit
-**Story Points: 3**
+**Story Points: 2**
 
 Als Team möchte ich, dass mein Bot flieht, wenn seine Gesundheit unter 20 fällt, damit er nicht sinnlos weiterkämpft und vielleicht überlebt.
 
 **Akzeptanzkriterien:**
+- Der Bot findet den nächsten Gegner.
 - Ist `sensors.self.health < 20`, bewegt sich der Bot vom nächsten Gegner weg (nicht auf ihn zu).
 - Ist `sensors.self.health >= 20`, verhält sich der Bot wie zuvor (normale Logik, z.B. aus Epic 2).
-- Gibt es keinen Gegner mehr (`sensors.others.isEmpty()`), wirft der Bot keine Exception (z.B. `Action.Wait` als Fallback).
+- Gibt es keinen Gegner mehr, wirft der Bot keine Exception (z.B. `Action.Wait` als Fallback).
+
+### Story 1.4 — Keine Bewegung verschwenden (Randcheck)
+**Story Points: 1**
+
+Als Team möchte ich, dass mein Bot keine Bewegung in Richtung außerhalb der Arena vorschlägt, damit er nicht durch einen ungültigen Zug einen Tick verschenkt.
+
+**Akzeptanzkriterien:**
+- Vor der Bewegung prüft der Bot, ob das Zielfeld der gewählten Richtung überhaupt in der Arena liegt.
+- Würde die gewählte Richtung aus der Arena hinausführen, wählt der Bot stattdessen eine andere, gültige Richtung.
+- Der Bot bewegt sich dadurch nie mehrere Ticks hintereinander ergebnislos "gegen die Wand".
+
+### Story 1.5 — Sicherheitsabstand zum nächsten Gegner halten
+**Story Points: 2**
+
+Als Team möchte ich, dass mein Bot unabhängig von seiner Gesundheit einen Mindestabstand zum nächsten Gegner hält, damit er nicht ungewollt direkt neben einem Gegner landet.
+
+**Akzeptanzkriterien:**
+- Der Bot berechnet die Distanz zum nächsten Gegner.
+- Unterschreitet die Distanz einen selbst gewählten Schwellenwert (z.B. 2 Felder), bewegt sich der Bot vom Gegner weg.
+- Ist der Abstand groß genug, verhält sich der Bot normal (z.B. Zufallsbewegung aus 1.1).
+- Gibt es keinen Gegner mehr, wirft der Bot keine Exception.
+
+### Story 1.6 — Fluchtrichtung mit Wandvermeidung kombinieren
+**Story Points: 2**
+
+Als Team möchte ich, dass mein fliehender Bot nicht gegen die Arena-Wand rennt, damit die Flucht aus Story 1.3 auch am Rand der Arena zuverlässig funktioniert.
+
+**Akzeptanzkriterien:**
+- Würde die Fluchtrichtung aus der Arena hinausführen, weicht der Bot stattdessen in eine andere gültige Richtung aus.
+- Weit weg vom Rand verhält sich der Bot wie in Story 1.3.
+- Gibt es keinen Gegner mehr, wirft der Bot keine Exception.
 
 ---
 
@@ -65,23 +100,52 @@ Als Team möchte ich, dass mein Bot ständig in eine feste Richtung schießt, da
 - Im Testduell gegen `StillstandBot` (aus `bots/examples`) wird sichtbar Schaden verursacht, wenn die Ausrichtung passt.
 
 ### Story 2.2 — Auf nächsten Gegner in Sichtlinie zielen
-**Story Points: 3**
+**Story Points: 2**
 
 Als Team möchte ich, dass mein Bot gezielt auf einen Gegner schießt, der sich exakt in seiner Reihe oder Spalte befindet, damit Treffer nicht dem Zufall überlassen sind.
 
 **Akzeptanzkriterien:**
-- Der Bot prüft für alle `sensors.others`, ob einer davon gleiches `x` (dann NORTH/SOUTH) oder gleiches `y` (dann EAST/WEST) wie `sensors.self.position` hat.
-- Gibt es mehrere Kandidaten, wird der nächstgelegene gewählt (kleinster Abstand).
+- Der Bot findet den nächstgelegenen Gegner, der exakt in seiner Reihe oder Spalte steht.
 - Steht kein Gegner in Sichtlinie, tut der Bot etwas anderes (z.B. bewegen, siehe Story 2.3) statt sinnlos ins Leere zu schießen.
 
 ### Story 2.3 — Gegner verfolgen, wenn nicht in Schusslinie
-**Story Points: 3**
+**Story Points: 2**
 
 Als Team möchte ich, dass mein Bot einem Gegner hinterherläuft, wenn er ihn nicht direkt anvisieren kann, damit er aktiv Kämpfe sucht statt nur zu warten.
 
 **Akzeptanzkriterien:**
-- Steht kein Gegner in Sichtlinie (siehe 2.2), bewegt sich der Bot einen Schritt in Richtung des nächstgelegenen Gegners (kleinste Distanz).
+- Steht kein Gegner in Sichtlinie (siehe 2.2), bewegt sich der Bot einen Schritt in Richtung des nächstgelegenen Gegners.
 - Kombiniert mit Story 2.2: steht ein Gegner in Sichtlinie → schießen, sonst → verfolgen.
+
+### Story 2.4 — Nicht ins Leere schießen
+**Story Points: 1**
+
+Als Team möchte ich, dass mein Bot nur schießt, wenn er wirklich ein Ziel treffen kann, damit er nicht sinnlos einen Tick mit einem Schuss ins Leere verschwendet.
+
+**Akzeptanzkriterien:**
+- Vor jedem `Action.Shoot(...)` prüft der Bot, ob überhaupt ein Gegner in der gewählten Richtung steht.
+- Kann kein Gegner getroffen werden, tut der Bot stattdessen etwas anderes (z.B. bewegen, siehe 1.1/2.3) statt zu schießen.
+- Gibt es keinen Gegner mehr, wirft der Bot keine Exception.
+
+### Story 2.5 — Schwächsten Gegner in Sichtlinie zuerst angreifen
+**Story Points: 2**
+
+Als Team möchte ich, dass mein Bot unter mehreren Gegnern in Sichtlinie gezielt den mit den wenigsten HP angreift, damit er Gegner schneller ausschaltet statt wahllos zu schießen.
+
+**Akzeptanzkriterien:**
+- Der Bot ermittelt alle in Sichtlinie treffbaren Gegner und wählt darunter den mit der niedrigsten `health` als Ziel.
+- Ist kein Gegner in Sichtlinie, verhält sich der Bot wie in Story 2.3 (verfolgen).
+- Gibt es keinen Gegner mehr, wirft der Bot keine Exception.
+
+### Story 2.6 — Rückzug beim Schießen vermeiden
+**Story Points: 2**
+
+Als Team möchte ich, dass mein Bot beim Verfolgen eines Gegners (Story 2.3) nicht direkt neben ihm stehen bleibt, damit er nicht unnötig nah am Gegner steht, sobald er ihn treffen kann.
+
+**Akzeptanzkriterien:**
+- Steht der Bot in Sichtlinie zum nächsten Gegner, aber näher als ein selbst gewählter Mindestabstand (z.B. 1 Feld), bewegt er sich einen Schritt zurück, statt weiter anzugreifen.
+- Ist der Abstand groß genug, schießt der Bot wie in Story 2.2.
+- Steht kein Gegner in Sichtlinie, verfolgt der Bot wie in Story 2.3.
 
 ---
 
@@ -98,12 +162,12 @@ Als Team möchte ich, dass mein Bot zwischen mehreren klar benannten Verhaltensz
 - Jeder Zustand führt zu klar unterscheidbarem, im Log sichtbarem Verhalten.
 
 ### Story 3.2 — Zielpriorisierung bei mehreren Gegnern
-**Story Points: 3**
+**Story Points: 2**
 
 Als Team möchte ich, dass mein Bot bei mehreren möglichen Zielen sinnvoll auswählt (z.B. den schwächsten oder nächsten Gegner), damit er nicht wahllos das erste beste Ziel angreift.
 
 **Akzeptanzkriterien:**
-- Bei mehreren Gegnern in `sensors.others` wählt der Bot nach einem klaren Kriterium (z.B. niedrigste `health` zuerst, oder kleinste Distanz).
+- Bei mehreren Gegnern in `sensors.others` wählt der Bot nach einem klaren Kriterium (z.B. niedrigste `health` oder kleinste Distanz).
 - Das Kriterium ist im Code klar benannt/kommentiert.
 
 ### Story 3.3 — Kür-Aufgabe (freie Wahl)
@@ -115,6 +179,26 @@ Als Team möchte ich eine eigene Idee umsetzen, die über die vorgegebenen Story
 - Team formuliert die Story selbst (kurz, 1-2 Sätze) und trägt sie als eigene Karte ins Board ein.
 - Dozent bestätigt kurz, dass die Idee mit der bestehenden `RobotBrain`-API umsetzbar ist, bevor das Team startet.
 - Beispiele: Bewegungsmuster, das Gegner in eine Ecke drängt; Bot, der sich an der Wand entlang bewegt; einfache "Ich schieße nur, wenn ich sicher treffe"-Heuristik.
+
+### Story 3.4 — Zeitgesteuerte Startphase (Patrouille zuerst)
+**Story Points: 2**
+
+Als Team möchte ich, dass mein Bot in den ersten Ticks erst patrouilliert statt sofort anzugreifen, damit er nicht direkt zu Matchbeginn unüberlegt in einen Kampf läuft.
+
+**Akzeptanzkriterien:**
+- Solange `sensors.tick` unter einem selbst gewählten Schwellenwert liegt (z.B. 10), bewegt sich der Bot nur (z.B. wie in Story 1.1 oder 1.2), auch wenn ein Gegner sichtbar ist.
+- Ab dem Schwellenwert verhält sich der Bot wie die bisherige Angriffslogik (z.B. aus Epic 2 oder Story 3.1).
+- Der Schwellenwert ist im Code als klar benannte Konstante erkennbar.
+
+### Story 3.5 — Abklingzeit nach der Flucht
+**Story Points: 3**
+
+Als Team möchte ich, dass mein Bot nach einer Flucht noch einige Ticks vorsichtig bleibt, damit er nicht sofort nach knappem Entkommen wieder ungeschützt in den nächsten Kampf läuft.
+
+**Akzeptanzkriterien:**
+- Der Bot merkt sich (z.B. über eine `var`-Property in der Bot-Klasse) für wie viele Ticks er sich zuletzt im Flucht-Zustand befunden hat.
+- Für eine selbst festgelegte Anzahl Ticks nach dem Ende einer Flucht verhält sich der Bot weiter vorsichtig (z.B. Rand halten statt angreifen).
+- Nach Ablauf dieser Zeit verhält sich der Bot wieder wie zuvor (z.B. Zustandsmaschine aus Story 3.1).
 
 ---
 

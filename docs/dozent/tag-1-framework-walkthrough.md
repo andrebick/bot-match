@@ -1,13 +1,68 @@
-# Framework-Walkthrough (Tag 1, 09:15–10:45)
+# Framework-Walkthrough (Tag 1, 09:30–10:45)
 
-Begleitmaterial für den dozentengeführten Block aus [tag-1.md](tag-1.md). Diese
-Datei erklärt nicht nur *was* gezeigt wird, sondern auch *wie man es erklärt* —
-inklusive der Grundkonzepte (Interface, Enum, ...), falls die im Vorlauf (Tag 1/2
-Kotlin-Grundlagen) nur gestreift wurden.
+Begleitmaterial für den dozentengeführten Block aus [tag-1.md](../tag-1.md). Diese
+Datei ist gleichzeitig **Inhalt** (was erklärt wird) und **Regie** (wie man es
+präsentiert) — beides in einer Datei, damit man während des Blocks nicht
+zwischen zwei Dokumenten wechseln muss.
 
 **Leitsatz für den Block:** Schüler schreiben ausschließlich den Body von
 `RobotBrain.decide()`. Alles hier Gezeigte ist fertig und wird nicht verändert —
 Ziel ist Verständnis, nicht Bearbeitung.
+
+## Die Grundentscheidung: Live-Code statt fertiger Folien
+
+Für den Code-Teil werden **keine klassischen Präsentationsfolien**
+(PowerPoint o.ä.) empfohlen. Stattdessen: **Beamer zeigt abwechselnd Editor,
+Terminal und die laufende App.** Nur für Einstieg und Übergang gibt es je eine
+kurze Folie (siehe "Folie 1" und "Folie 2" unten).
+
+**Warum kein Foliensatz für den Code?**
+- Schüler sehen echten, klickbaren Code — keine Screenshots, die schon beim
+  Erstellen veraltet sein können.
+- Bei Fragen ("was macht `.random()` nochmal genau?") kann man direkt im
+  Editor nachschauen oder ausprobieren, statt an eine feste Folienreihenfolge
+  gebunden zu sein.
+- Der Kontrast "das hier ist fertiges Framework" vs. "das hier schreibt ihr
+  selbst" wirkt am stärksten, wenn beide Dateien als Tabs im selben
+  Editor-Fenster offen sind und man einfach zwischen ihnen hin- und herklickt.
+
+**Was du technisch brauchst:** Terminal-Fenster (für `./gradlew run`), Editor
+(IntelliJ oder VS Code) mit bereits geöffnetem Projekt, beide Fenster
+nebeneinander oder schnell per Tastenkombination wechselbar.
+
+## Vor dem Block: Technik-Checkliste
+
+Unbedingt **vor** den Schülern durchgehen, nicht live improvisieren:
+
+- [ ] Projekt einmal lokal bauen (`./gradlew build`), damit die Live-Demo nicht
+      an einem kalten Gradle-Cache/Download hängen bleibt
+- [ ] Editor-Schriftgröße hochstellen (mindestens 18pt, besser 20pt) — sonst
+      ist von hinten im Raum nichts lesbar
+- [ ] Terminal-Schriftgröße ebenfalls hochstellen
+- [ ] Beamer-Auflösung/Spiegelung testen, bevor Schüler im Raum sind
+- [ ] Diese Dateien als Tabs vorab öffnen, in dieser Reihenfolge:
+      `Models.kt`, `Toolkit.kt`, `RandomBot.kt`, `TeamABots.kt` (bzw. die für
+      die anwesenden Teams relevante(n) Team-Datei(en))
+- [ ] `docs/dozent/scrum-board.md` und ausgedruckte Backlog-Karten (siehe
+      [pdf/README.md](../pdf/README.md)) am Board bereitlegen für den Übergang
+      danach
+
+---
+
+## Folie 1 — Einstieg (die einzige Folie vor dem Live-Teil)
+
+Eine einzelne Folie oder alternativ ein Whiteboard-Anschrieb, bevor irgendetwas
+gestartet wird:
+
+**Titel:** Framework-Walkthrough — was baut ihr heute?
+
+Inhalt (2-3 Stichpunkte, groß geschrieben):
+- Sprint-Ziel: *"Bot mit mindestens zwei Verhaltensregeln, der ein Testduell
+  übersteht."*
+- Ein Satz, den man auch laut sagen sollte: *"Ihr schreibt heute eine einzige
+  Funktion. Alles andere — Spielfeld, Regeln, Anzeige — ist schon fertig."*
+
+Danach die Folie weglegen/ausblenden und direkt zu Abschnitt 1 wechseln.
 
 ---
 
@@ -17,6 +72,17 @@ Bevor der eigentliche Code gezeigt wird, hier die drei Kotlin-Konzepte, die im
 Framework ständig vorkommen — mit einfachen Erklärungen, die man 1:1 an die Schüler
 weitergeben kann. Wer die Konzepte schon sicher beherrscht, kann diesen Abschnitt
 überspringen und direkt zu Abschnitt 1 gehen.
+
+**Regie:** Dieser Abschnitt läuft weg vom Beamer — Tafel/Whiteboard oder im
+Stehen erklären, noch kein Code zeigen. Wenn die Klasse Interface/Enum/data
+class aus dem Kotlin-Vorlauf schon sicher beherrscht: Abschnitt komplett
+weglassen und die Zeit in Abschnitt 5/6 investieren.
+
+**Kurzform der vier Analogien, griffbereit halten:**
+- Interface = Stellenausschreibung ("kann kochen", aber nicht wie)
+- Enum = Ampel (nur Rot/Gelb/Grün, nichts dazwischen)
+- data class = Karteikarte mit automatischem "sind zwei Karten gleich?"-Check
+- sealed interface = "genau eine von mehreren fest definierten Möglichkeiten"
 
 ### Was ist ein Interface?
 
@@ -125,21 +191,40 @@ interface` definiert, ist **nicht** Lernziel — nur die Benutzung.
 
 ## 1. Live-Demo zuerst (5 Min)
 
-`./gradlew run` starten, `RandomBot` vs. `ChaserBot` laufen lassen. Schüler sehen
-das Endergebnis, bevor auch nur eine Zeile Code gezeigt wird — Motivation vor Theorie.
+**Regie — Wechsel zu:** Terminal, dann App-Fenster.
 
-Sprechzeile: *"Das hier ist das Endprodukt von heute. Zwei fertige Bots kämpfen
-gegeneinander. Am Ende des Tages soll euer eigener Bot genauso hier mitspielen."*
+1. Terminal einblenden, `./gradlew run` eintippen und ausführen (dauert je nach
+   Rechner 10-30 Sekunden — diese Zeit für den Sprechtext von Folie 1 nutzen,
+   nicht schweigend warten).
+2. Sobald die App startet: `RandomBot` und `ChaserBot` als Teilnehmer auswählen,
+   Match starten.
+3. App-Fenster maximieren, damit alle im Raum das Raster sehen.
 
-Kurz auf UI zeigen, ohne Details: Arena links (10×10-Raster), Scoreboard und Log
-rechts. Nicht erklären, wie das gebaut ist — nur, dass es existiert und fertig ist.
+Sprechzeile: *"Schaut euch das an — zwei fertige Bots, die gegeneinander
+kämpfen. Das ist keine Zauberei, das ist Code, den wir uns jetzt gemeinsam
+anschauen. Am Ende des heutigen Tages soll euer eigener Bot hier genauso
+mitspielen können."*
+
+Kurz auf UI-Elemente zeigen (nicht erklären, nur benennen): Arena links
+(10×10-Raster), Scoreboard und Log rechts — da sehen Schüler später, was ihr
+Bot in jedem Moment tut.
 
 ---
 
 ## 2. Das Domain-Modell — `framework/arena/Models.kt` (55 Zeilen)
 
-Datei komplett öffnen, im Editor von oben nach unten scrollen. Das ist die
-zentrale Datei — hier stehen alle "Bausteine", mit denen ein Bot arbeitet.
+**Regie — Wechsel zu:** Editor, Tab `Models.kt`. Von oben nach unten scrollen,
+bei jedem Typ kurz stehen bleiben, Reihenfolge exakt wie unten: `Direction` →
+`Position` → `RobotState` → `Sensors` → `Action` → `RobotBrain` → `Toolkit.kt`.
+
+**Konkrete Methode, die Aufmerksamkeit hochhält:** Bei jedem neuen Typ erst
+laut die Frage stellen *"Was glaubt ihr, wofür ist das da?"*, 2-3 Antworten aus
+dem Raum sammeln, dann erst die eigene Erklärung geben.
+
+**Bei jedem Typ zusätzlich ein Nutzungsbeispiel zeigen, nicht nur die
+Definition** — die reine Typ-Definition allein bleibt abstrakt, das Beispiel
+macht den Bezug zur eigenen Aufgabe sichtbar. Am besten direkt in einer
+Scratch-Datei oder als Kommentar im Editor eintippen und laufen lassen.
 
 ### `Direction`
 
@@ -172,10 +257,12 @@ automatisch als gleich. Das wird später wichtig, z.B. um zu prüfen "steht der 
 auf derselben Position wie ich?"
 
 Die Funktion `moved(direction)` ist die praktische Anwendung des Enums von eben:
-"Gib mir die Position, die einen Schritt in diese Richtung liegt." Beispiel an der
-Tafel: Roboter steht auf `(3, 3)`, bewegt sich `NORTH` → neue Position ist
-`(3 + 0, 3 + (-1))` = `(3, 2)`. Bewusst durchrechnen, das festigt "y wird kleiner
-bei NORTH" nochmal visuell.
+"Gib mir die Position, die einen Schritt in diese Richtung liegt."
+
+**Regie — besonders hervorheben mit einem Beispiel an der Tafel:** Roboter
+steht auf `(3, 3)`, bewegt sich `NORTH` → neue Position ist `(3 + 0, 3 + (-1))`
+= `(3, 2)`. Bewusst durchrechnen — abstrakte Formeln bleiben bei 10.-Klässlern
+schlechter hängen als ein durchgerechnetes Zahlenbeispiel.
 
 Kurzer Hinweis zur Kurzschreibweise `fun moved(...) = Position(...)`: das ist nur
 eine kürzere Schreibweise für eine Funktion, die nur eine einzige Berechnung
@@ -296,7 +383,7 @@ vorherige Ticks?** Zwei Gründe, die man den Schülern nennen kann:
 2. **Einfachheit:** `decide()` muss nur eine Frage beantworten — "was tue ich JETZT,
    basierend auf dem, was ich JETZT sehe?" Kein Bot muss sich selbst Zustand über
    mehrere Ticks hinweg merken, es sei denn er will es (das ist optional möglich
-   über eine eigene `var` in der Bot-Klasse, siehe Story 3.1 im Backlog).
+   über eine eigene `var` in der Bot-Klasse, siehe Story 3.1 und 3.5 im Backlog).
 
 **Konkretes Nutzungsbeispiel — ein kompletter Mini-Bot, der alle vier Sensor-Felder
 mindestens einmal benutzt:**
@@ -357,12 +444,13 @@ Action.Shoot(Direction.WEST)     // nach links schießen
 Action.Wait                      // nichts tun (kein Klammern, da kein Parameter)
 ```
 
-Kleiner, aber wichtiger Stolperstein: `Action.Wait` wird **ohne** Klammern
-geschrieben (`Action.Wait`, nicht `Action.Wait()`), weil es ein `data object` ist —
-ein Singleton, kein Konstruktor-Aufruf. `Move` und `Shoot` dagegen brauchen Klammern
-mit einer `Direction` drin, weil es `data class`es sind, die einen Wert
-mitbekommen. Dieser Unterschied verwirrt fast immer beim ersten Schreiben — kurz
-explizit erwähnen.
+**Regie — bei `Action` besonders auf die Klammer-Falle hinweisen:**
+`Action.Wait` wird **ohne** Klammern geschrieben (`Action.Wait`, nicht
+`Action.Wait()`), weil es ein `data object` ist — ein Singleton, kein
+Konstruktor-Aufruf. `Move` und `Shoot` dagegen brauchen Klammern mit einer
+`Direction` drin, weil es `data class`es sind, die einen Wert mitbekommen.
+Dieser Unterschied verwirrt fast immer beim ersten eigenen Schreiben, wenn er
+nicht vorher explizit erwähnt wurde — kurz explizit erwähnen.
 
 ### `RobotBrain`
 
@@ -380,15 +468,53 @@ bauen: eine Klasse, die diesen Vertrag erfüllt.**
 Zusammenfassender Satz für die Tafel: *"Ein Bot ist nichts anderes als ein Name plus
 eine Funktion, die aus `Sensors` eine `Action` macht."*
 
+### Toolkit.kt — was euch die Bibliothek abnimmt
+
+**Regie:** Datei im Editor kurz aufklappen, nicht Zeile für Zeile lesen — nur
+zeigen, dass sie existiert und im selben Package wie `Models.kt` liegt.
+Kurzer Ausblick, kein Detail-Deep-Dive (2-3 Min).
+
+Neben `Models.kt` gibt es im selben Package (`framework/arena`) noch
+`Toolkit.kt` — fertige Funktionen für genau die Rasterrechnung, die sonst von
+Hand gemacht werden müsste (Abstand zwischen zwei Positionen,
+nächster/schwächster Gegner, Richtung zu einem Ziel, Sichtlinien-Check,
+Rand/Mitte-Erkennung).
+
+```kotlin
+val ziel = sensors.nearestEnemy() ?: return Action.Wait
+if (sensors.canShoot(ziel)) {
+    return Action.Shoot(sensors.self.position.directionTo(ziel.position)!!)
+}
+```
+
+Sprechzeile: *"Distanz, Richtung, nächster Gegner, Sichtlinie — das rechnet
+diese Datei für euch aus. Ihr ruft nur die Funktion auf. Eure Aufgabe ist es,
+diese fertigen Bausteine sinnvoll zu kombinieren, nicht sie neu zu
+erfinden."* Weil die Funktionen im selben Package wie `Models.kt` liegen,
+reicht der gewohnte `import framework.arena.*` — kein zusätzlicher
+Import-Pfad.
+
+Vollständige Funktionsliste zum Nachschlagen für später:
+[`docs/toolkit-referenz.md`](../toolkit-referenz.md) — das ist die Datei, auf die
+man Schüler verweist, wenn während der Arbeitsblöcke die Frage kommt "wie
+berechne ich X?".
+
 ---
 
 ## 3. Wie wird `decide()` aufgerufen? — `GameEngine.step()`
 
-Jetzt bewusst **weg vom Code, hin zur Tafel/Whiteboard** — als Kontrastmoment. Die
-Datei `GameEngine.kt` selbst ist mit über 300 Zeilen zu dicht und nutzt fortgeschrittene
-Kotlin-Konzepte (Higher-Order-Functions, `groupBy`, Destructuring), die für
-Kotlin-Anfänger noch zu viel wären. Stattdessen den Ablauf **als Diagramm** an die
-Tafel zeichnen:
+**Regie — Wechsel zu:** weg vom Beamer, hin zur Tafel/zum Whiteboard. Das ist
+bewusst ein Medienwechsel — signalisiert "jetzt nicht mehr Kotlin-Syntax,
+jetzt der große Ablauf". Die Datei `GameEngine.kt` selbst ist mit über 300
+Zeilen zu dicht und nutzt fortgeschrittene Kotlin-Konzepte (Higher-Order-
+Functions, `groupBy`, Destructuring), die für Kotlin-Anfänger noch zu viel
+wären. Stattdessen den Ablauf **als Diagramm an die Tafel malen**:
+
+```
+Sensors bauen → decide() aufrufen → Bewegungen auflösen → Schaden anwenden
+```
+
+Ausführlicher als Kasten-Diagramm:
 
 ```
 ┌─────────────────┐   ┌──────────────┐   ┌────────────────────┐   ┌──────────────────┐
@@ -415,8 +541,9 @@ dass alle Spieler gleichzeitig ziehen statt nacheinander.
 ### Zwei Aha-Momente, die man als Geschichte erzählen sollte (nicht als Regel)
 
 Diese zwei Dinge erklären scheinbar "komische" Spielsituationen, die Schüler später
-beim Testen beobachten werden. Am besten als kleine Geschichte erzählen, nicht als
-trockene Regel:
+beim Testen beobachten werden. **Regie:** bewusst als kleine Geschichte erzählen,
+nicht an die Tafel schreiben — es sind spätere Aha-Momente, keine Merksätze zum
+Auswendiglernen.
 
 **Geschichte 1 — der Bewegungs-Konflikt:**
 *"Stellt euch vor, zwei Bots stehen nebeneinander und wollen beide ins selbe freie
@@ -462,10 +589,15 @@ eurem Code."*
 
 ---
 
-## 5. Ein fertiger Beispiel-Bot — `bots/examples/RandomBot.kt` (23 Zeilen)
+## 5. Ein fertiger Beispiel-Bot — `bots/examples/RandomBot.kt` (29 Zeilen)
 
-Das ist die zentrale, aktive Übung des Blocks. Gemeinsam Zeile für Zeile am Beamer,
-Schüler sollen raten, was die nächste Zeile wohl tut, **bevor** sie erklärt wird:
+**Regie — Wechsel zu:** Editor, Tab `RandomBot.kt`. Das ist der wichtigste
+Programmpunkt des ganzen Blocks — hier sehen Schüler zum ersten Mal, wie ein
+`RobotBrain` tatsächlich implementiert aussieht.
+
+**Konkrete Methode:** Vor jeder Zeile fragen *"Was glaubt ihr, macht diese
+Zeile?"* und 10-15 Sekunden Stille aushalten, bevor man selbst erklärt — das
+ist unbequem, aber aktiviert deutlich mehr als reines Vorlesen.
 
 ```kotlin
 class RandomBot(override val name: String = "RandomBot") : RobotBrain {
@@ -497,14 +629,16 @@ zurück, der direkt hinter `return` steht. Das ist in Kotlin normal, aber für
 Einsteiger aus anderen Sprachen oft neu — kurz erwähnen.
 
 Optional, nur wenn Zeit bleibt: `ChaserBot.kt` zeigen (sucht nächstgelegenen Gegner
-über Distanzberechnung). Das ist aber schon Story-2.3-Niveau — nicht erzwingen,
+über Toolkit-Funktionen). Das ist aber schon Story-2.3-Niveau — nicht erzwingen,
 wenn die Zeit knapp wird.
 
 ---
 
 ## 6. Wo trage ich meinen Code ein? — `bots/teama/TeamABots.kt`
 
-Das eigentliche Ziel des ganzen Blocks: jeder weiß danach genau, wo er/sie schreibt.
+**Regie — Wechsel zu:** Editor, Tab `TeamABots.kt` (bzw. passende Team-Datei).
+Das eigentliche Ziel des ganzen Blocks: jeder weiß danach genau, wo er/sie
+schreibt.
 
 ```kotlin
 package bots.teama
@@ -526,40 +660,60 @@ class MeinBot(override val name: String = "Team A - MeinBot") : RobotBrain {
 val teamABots: List<RobotBrain> = listOf(MeinBot())
 ```
 
-Live demonstrieren: `Action.Move(Direction.SOUTH)` zu
-`Action.Move(Direction.entries.random())` ändern, `./gradlew run` neu starten,
-zeigen dass der Bot jetzt zufällig läuft. Das ist der Moment, an dem jedes Team
-merkt: *"So einfach ist der erste Schritt."*
+**Live demonstrieren:** `Action.Move(Direction.SOUTH)` zu
+`Action.Move(Direction.entries.random())` ändern, zurück zum Terminal
+wechseln, `./gradlew run` neu starten, zeigen dass der Bot jetzt zufällig
+läuft.
+
+Sprechzeile: *"Das war's schon — eine Zeile geändert, neu gestartet, der Bot
+verhält sich anders. Genau das macht ihr jetzt gleich selbst, nur mit eurer
+eigenen Logik."*
 
 **Der mit Abstand häufigste Compile-Fehler**, den man vorab ankündigen sollte: eine
 neue Bot-Klasse wird angelegt, aber vergessen, sie unten in die
 `teamXBots`-Liste einzutragen (`listOf(MeinBot())`) — der Bot compiliert dann zwar,
-taucht aber nicht in der App-Auswahl auf. Das explizit vorab sagen, damit Schüler
-das beim ersten Mal selbst erkennen statt zu verzweifeln.
+taucht aber nicht in der App-Auswahl auf.
+
+Sprechzeile dazu: *"Wenn ihr eine ganz neue Bot-Klasse anlegt: vergesst nicht,
+sie unten in die Liste einzutragen — sonst taucht sie nicht in der
+Bot-Auswahl auf. Das ist der Fehler, der euch als Erstes passieren wird, und
+das ist völlig normal."* Explizit vorab sagen, damit Schüler das beim ersten
+Mal selbst erkennen statt zu verzweifeln.
 
 ---
 
-## Vorschlag Zeitbudget (90 Min gesamt, 09:15–10:45)
+## Folie 2 — Übergang zu Arbeitsblock 2
+
+**Titel:** Jetzt seid ihr dran
+
+Inhalt:
+- Story 1.1 (Zufällige Bewegung) als Einstieg
+- Erinnerung: Pair-Programming, Driver/Navigator wechseln sich ab
+- Erinnerung: neue Klasse → in `teamXBots`-Liste eintragen
+
+Danach direkt zu den Rechnern schicken, Board zeigen (Karten liegen schon in der
+Backlog-Spalte, siehe scrum-board.md).
+
+---
+
+## Vorschlag Zeitbudget (75 Min gesamt, 09:30–10:45)
 
 | Zeit | Dauer | Inhalt |
 |---|---|---|
-| 09:15–09:20 | 5 Min | Live-Demo (RandomBot vs. ChaserBot) |
-| 09:20–09:30 | 10 Min | Grundkonzepte: Interface, Enum, data class, sealed interface (Abschnitt 0) |
-| 09:30–09:55 | 25 Min | `Models.kt` komplett durchgehen, inkl. Beispiele je Typ (Abschnitt 2) |
-| 09:55–10:05 | 10 Min | `GameEngine.step()` als Tafel-Diagramm (Abschnitt 3) |
-| 10:05–10:08 | 3 Min | `BotExecutor`-Sicherheitsnetz, nur Kernaussage (Abschnitt 4) |
-| 10:08–10:25 | 17 Min | `RandomBot.kt` gemeinsam Zeile für Zeile (Abschnitt 5) |
-| 10:25–10:40 | 15 Min | `TeamXBots.kt` — wo trage ich ein, Live-Beispiel bauen und laufen lassen (Abschnitt 6) |
+| 09:30–09:35 | 5 Min | Live-Demo (RandomBot vs. ChaserBot) |
+| 09:35–10:00 | 25 Min | `Models.kt` komplett durchgehen, inkl. Beispiele je Typ + kurzer Toolkit.kt-Ausblick (Abschnitt 2) |
+| 10:00–10:08 | 8 Min | `GameEngine.step()` als Tafel-Diagramm (Abschnitt 3) |
+| 10:08–10:11 | 3 Min | `BotExecutor`-Sicherheitsnetz, nur Kernaussage (Abschnitt 4) |
+| 10:11–10:28 | 17 Min | `RandomBot.kt` gemeinsam Zeile für Zeile (Abschnitt 5) |
+| 10:28–10:40 | 12 Min | `TeamXBots.kt` — wo trage ich ein, Live-Beispiel bauen und laufen lassen (Abschnitt 6) |
 | 10:40–10:45 | 5 Min | Fragen, Übergang zu Arbeitsblock 2 (Story 1.1) |
 
-Wenn die Grundkonzepte (Abschnitt 0) aus dem Kotlin-Vorlauf schon sicher sitzen,
-kann dieser Programmpunkt entfallen — die gewonnenen 10 Minuten dann in Abschnitt 2
-(mehr Zeit für die Beispiele je Modell-Typ) oder Abschnitt 5 investieren. Die
-Nutzungsbeispiele in Abschnitt 2 (bei `Position`, `RobotState`, `Sensors`, `Action`)
-sind bewusst so gewählt, dass sie schon kleine Vorschauen auf spätere Backlog-Storys
-sind (z.B. Flucht bei niedriger Gesundheit, Zielen auf Gegner) — bei Zeitdruck
-lieber diese Beispiele kürzen als ganz weglassen, sie sind der Teil, der Schülern
-später beim eigenständigen Programmieren am meisten hilft.
+Die Grundkonzepte (Abschnitt 0: Interface, Enum, data class, sealed interface)
+sind hier bewusst nicht mehr im Standardbudget — sie wurden durch das neue
+09:15–09:30-Kurz-Intro zu Git/Gradle verdrängt. Wenn die Klasse sie aus dem
+Kotlin-Vorlauf noch nicht sicher beherrscht, kurz in Abschnitt 2 nebenbei
+miterklären (z.B. bei `Direction` das Enum-Konzept, bei `Action` den `sealed
+interface`), statt einen eigenen Block dafür zu reservieren.
 
 ## Was bewusst NICHT gezeigt wird (und warum)
 

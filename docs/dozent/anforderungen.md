@@ -60,7 +60,7 @@ Diese Punkte waren im ursprünglichen Auftrag offen und wurden vor der Umsetzung
 | Netzwerk-Umgebung | Internet beim Gradle-Build verfügbar (Standard-Firmennetz), kein Offline-Cache vorbereitet |
 | Scrum-Board | Physisch (Whiteboard/Post-its), **ein gemeinsames Board für alle drei Gruppen** (kein Board pro Team) |
 | Projekt-/Modul-Struktur | Ein Gradle-Projekt, drei Bot-Packages (`bots/teama`, `bots/teamb`, `bots/teamc`), keine separaten Gradle-Module |
-| Versionskontrolle | Kein Git — loser Ordner. Integration der Team-Bots erfolgt manuell auf dem Dozenten-Rechner |
+| Versionskontrolle | Kein Git — loser Ordner. Integration der Team-Bots erfolgt manuell auf dem Dozenten-Rechner (**später revidiert**: tatsächlich umgesetzt wurde ein Git-Branch/PR-Workflow, siehe [`setup.md`](setup.md) und [`../git-github-basics.md`](../git-github-basics.md)) |
 
 ## Bewusst gewählte Vereinfachung (kein offener Punkt, aber erwähnenswert)
 

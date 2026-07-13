@@ -33,39 +33,35 @@ WEST = x - 1              EAST = x + 1
         SOUTH  = y + 1   (nach unten)
 ```
 
-### Die zwei wichtigsten Rechnungen
+### Die wichtigsten Werkzeuge
 
-Fast jede Story braucht eine von diesen beiden. Schreibt sie euch einmal auf,
-dann könnt ihr sie überall wiederverwenden.
+Für Distanz-, Richtungs- und Gegnersuche-Fragen müsst ihr nicht selbst
+rechnen — dafür gibt es fertige Toolkit-Funktionen (`import framework.arena.*`
+reicht, kein zusätzlicher Import-Pfad nötig). Volle Übersicht mit allen
+Funktionen: [`toolkit-referenz.md`](toolkit-referenz.md).
 
-**"Wie weit ist der Gegner weg?"** — Abstand (Manhattan-Distanz):
-
-```kotlin
-import kotlin.math.abs
-
-val abstand = abs(gegner.position.x - self.position.x) +
-              abs(gegner.position.y - self.position.y)
-```
-
-Das ist die Summe aus "wie viele Schritte nach links/rechts" **plus** "wie viele
-nach oben/unten". Genau passend, weil man sich nur gerade (nicht diagonal)
-bewegen kann.
-
-**"In welche Richtung liegt der Gegner?"** — Richtungsvektor `dx`/`dy`:
+**"Wer ist der nächste Gegner?"**
 
 ```kotlin
-val dx = gegner.position.x - self.position.x   // + = Gegner ist rechts, - = links
-val dy = gegner.position.y - self.position.y   // + = Gegner ist unten, - = oben
+val ziel = sensors.nearestEnemy() ?: return Action.Wait
 ```
 
-`dx` und `dy` sagen euch, wo der Gegner **relativ zu euch** steht. Fast die
-gesamte Bewegungs- und Schuss-Logik im ganzen Backlog ist am Ende nur:
-*schau dir `dx` und `dy` an und leite daraus eine Richtung ab.*
+**"Wie komme ich zu ihm hin, oder weg von ihm?"**
 
-> **Wichtige Falle beim Vorzeichen:** Wollt ihr **zum** Gegner hin, bewegt ihr
-> euch in Richtung von `dx`/`dy`. Wollt ihr **weg** (fliehen), dreht ihr das
-> Vorzeichen um. Das ist DIE Stelle, an der sich alle mal vertun — bei jeder
-> Bewegungs-Story kurz gegenprüfen: "laufe ich gerade hin oder weg?"
+```kotlin
+val hinRichtung = self.approachDirectionTo(ziel.position)
+val wegRichtung = self.fleeDirectionFrom(ziel.position)
+```
+
+**"Steht er in meiner Schusslinie?"**
+
+```kotlin
+if (sensors.canShoot(ziel)) { /* schießen */ }
+```
+
+Fast die gesamte Bewegungs- und Schuss-Logik im ganzen Backlog ist am Ende nur:
+*welche Toolkit-Funktion passt hier, und wie kombiniere ich sie mit einer
+`if`/`else`-Entscheidung?*
 
 ---
 
@@ -90,7 +86,7 @@ wenn das klappt, lohnen sich die schwereren Storys.
 
 ---
 
-### Story 1.2 — Am Rand bleiben / Zentrum meiden  ·  2 Punkte
+### Story 1.2 — Am Rand bleiben / Zentrum meiden  ·  1 Punkt
 
 **Ziel:** Bot soll sich nicht in der Mitte aufhalten, sondern Richtung Rand.
 
@@ -107,18 +103,26 @@ Mitte (schlecht):        Rand (besser):          Ecke (am sichersten):
 ```
 
 **Leitfragen:**
-- Wo ist die Mitte? `sensors.arenaWidth / 2` und `sensors.arenaHeight / 2`.
-- Wie weit bin ich von der Mitte weg? Mit `abs(pos.x - mitteX)`.
-- Wenn ich zu nah dran bin: in welche Richtung ist der Rand näher — links oder
-  rechts? Vergleicht `pos.x` mit `mitteX`.
+- Bin ich zu nah an der Mitte? Dafür gibt's schon eine fertige Funktion:
+  `sensors.isNearCenter()`.
+- Wenn ja: in welche Richtung ist der nächste Rand? Auch fertig:
+  `sensors.directionToNearestEdge()`.
 
-**Taktik-Gedanke:** Ihr müsst es nicht perfekt machen. Es reicht schon, wenn ihr
-**eine** Achse betrachtet: "Stehe ich links von der Mitte? → weiter nach WEST.
-Sonst → nach EAST." Wer mag, macht dasselbe zusätzlich für oben/unten.
+```kotlin
+if (sensors.isNearCenter()) {
+    return Action.Move(sensors.directionToNearestEdge())
+}
+```
+
+**Taktik-Gedanke:** Mehr braucht die Story eigentlich nicht — die beiden
+Toolkit-Funktionen übernehmen komplett, was ihr sonst mit `abs()` und
+Vergleichen selbst hättet rechnen müssen. Wer mag, ergänzt noch ein
+`else`-Verhalten für den Fall, dass man schon am Rand steht (z.B. aus 1.1
+oder Epic 2).
 
 ---
 
-### Story 1.3 — Flucht bei niedriger Gesundheit  ·  3 Punkte
+### Story 1.3 — Flucht bei niedriger Gesundheit  ·  2 Punkte
 
 **Ziel:** Sinkt `health` unter 20, läuft der Bot **weg** vom nächsten Gegner.
 Sonst verhält er sich normal (z.B. wie in Epic 2, oder erst mal Zufallslauf).
@@ -148,124 +152,154 @@ Das Akzeptanzkriterium verlangt drei Dinge — hakt sie einzeln ab:
 
 Fliehen könnt ihr nur **vor** jemandem. Also zuerst: wer ist der nächste Gegner?
 Der Leer-Fall ist keine Kür, sondern Pflicht (Kriterium 3) — ohne ihn stürzt der
-Bot ab, sobald der letzte Gegner tot ist und `sensors.others` leer wird.
+Bot ab, sobald der letzte Gegner tot ist und `sensors.others` leer wird. Beides
+übernimmt eine einzige Toolkit-Funktion:
 
 ```kotlin
-import kotlin.math.abs
-
-val self = sensors.self.position
-
-// Kein Gegner mehr da? Dann sofort raus, nicht weiterrechnen.
-if (sensors.others.isEmpty()) {
-    return Action.Wait
-}
-
-// Nächsten Gegner mit einer Schleife suchen (den mit dem kleinsten Abstand)
-var naechster = sensors.others[0]
-var kleinsterAbstand = abs(naechster.position.x - self.x) + abs(naechster.position.y - self.y)
-for (gegner in sensors.others) {
-    val abstand = abs(gegner.position.x - self.x) + abs(gegner.position.y - self.y)
-    if (abstand < kleinsterAbstand) {
-        kleinsterAbstand = abstand
-        naechster = gegner
-    }
-}
+val naechster = sensors.nearestEnemy() ?: return Action.Wait
 ```
 
-So funktioniert die Schleife: Wir merken uns anfangs den **ersten** Gegner als
-"nächsten". Dann gehen wir alle Gegner durch und rechnen für jeden den Abstand
-aus. Ist einer näher als der bisher gemerkte, wird er zum neuen `naechster`. Am
-Ende steht in `naechster` der Gegner mit dem kleinsten Abstand.
-
-Wichtig: die `isEmpty()`-Prüfung **vorher**, sonst knallt `sensors.others[0]` bei
-leerer Liste.
+`nearestEnemy()` gibt `null` zurück, wenn keiner mehr lebt — der `?:`-Fallback
+fängt genau das ab.
 
 ---
 
-#### Schritt 2 — "wo steht der Gegner relativ zu mir?" (dx / dy)
+#### Schritt 2 — Fluchtrichtung bestimmen
+
+Auch das Vorzeichen-Dreh-Problem (weg statt hin, richtige Achse zuerst) nimmt
+euch eine Funktion ab:
 
 ```kotlin
-val dx = naechster.position.x - self.x   // + = Gegner rechts von mir, - = links
-val dy = naechster.position.y - self.y   // + = Gegner unter mir,   - = über mir
+val richtung = sensors.self.position.fleeDirectionFrom(naechster.position)
 ```
 
-Beispiel: ich stehe bei `(3,7)`, Gegner bei `(7,8)`.
-`dx = 7 - 3 = 4` (Gegner ist 4 nach rechts), `dy = 8 - 7 = 1` (1 nach unten).
+`fleeDirectionFrom` schaut sich an, auf welcher Achse der Abstand größer ist,
+und liefert die Richtung **weg** vom Gegner auf genau dieser Achse — ihr müsst
+weder `abs()` noch Vorzeichen selbst anfassen.
+
+> Zum Verständnis, was dahinter passiert: schaut euch die Beschreibung von
+> `approachDirectionTo`/`fleeDirectionFrom` in
+> [`toolkit-referenz.md`](toolkit-referenz.md) an — dort steht auch, warum die
+> Karte (`y` wächst nach **unten**) das Ergebnis beeinflusst.
 
 ---
 
-#### Schritt 3 — nur **eine** Achse pro Tick (die mit dem größeren Abstand)
-
-`Action.Move` erlaubt pro Tick **nur eine** Richtung — nicht diagonal. Ihr müsst
-euch also entscheiden: erst nach links/rechts fliehen oder erst nach oben/unten?
-
-Faustregel: **flieht zuerst auf der Achse, wo der Gegner weiter weg ist.** Warum?
-Dort bringt ein Schritt den größten Sicherheitsabstand. Vergleicht `abs(dx)` mit
-`abs(dy)`:
-
-```
-Gegner weit rechts, kaum drüber:  dx = 4, dy = 1
-abs(dx)=4  >  abs(dy)=1   →  auf der x-Achse fliehen
-
-●  ·  ·  ·  G      Gegner rechts → ich fliehe nach links (WEST)
-←●
-```
-
----
-
-#### Schritt 4 — Vorzeichen umdrehen (DAS ist die Flucht)
-
-Beim **Verfolgen** (Epic 2) lauft ihr *in* Richtung `dx`/`dy`. Beim **Fliehen**
-genau **andersrum**. Merkt euch das als Spiegel:
-
-| Gegner steht … | `dx`/`dy` | **Verfolgen** (hin) | **Fliehen** (weg) |
-|---|---|---|---|
-| rechts von mir | `dx > 0` | EAST | **WEST** |
-| links von mir  | `dx < 0` | WEST | **EAST** |
-| unter mir      | `dy > 0` | SOUTH | **NORTH** |
-| über mir       | `dy < 0` | NORTH | **SOUTH** |
-
-Als Code (nur der Flucht-Zweig):
-
-```kotlin
-if (abs(dx) > abs(dy)) {
-    // x-Achse: Gegner rechts (dx>0) → ich nach WEST, sonst nach EAST
-    return Action.Move(if (dx > 0) Direction.WEST else Direction.EAST)
-} else {
-    // y-Achse: Gegner unten (dy>0) → ich nach NORTH, sonst nach SOUTH
-    return Action.Move(if (dy > 0) Direction.NORTH else Direction.SOUTH)
-}
-```
-
-> Denkt an die Karte: `y` wächst nach **unten**. "Nach oben fliehen" heißt NORTH
-> und macht `y` **kleiner**. Wer hier `y` mit "unten = kleiner" verwechselt,
-> baut genau den Vorzeichenfehler ein.
-
----
-
-#### Schritt 5 — der `else`-Zweig (genug HP)
+#### Schritt 3 — der `else`-Zweig (genug HP)
 
 Kriterium 2: Bei `health >= 20` soll der Bot **normal** weitermachen. Was "normal"
 ist, hängt davon ab, wie weit ihr seid:
 
 - Habt ihr Epic 2 noch nicht: einfach `Action.Move(Direction.entries.random())`
-  oder auf den Gegner **zu** laufen (Flucht-Code mit **nicht** getauschtem
-  Vorzeichen).
+  oder mit `approachDirectionTo` auf den Gegner **zu** laufen.
 - Habt ihr Epic 2 schon: hier eure Angriffs-Logik (schießen / verfolgen)
   einsetzen.
+
+Zusammengebaut:
+
+```kotlin
+val naechster = sensors.nearestEnemy() ?: return Action.Wait
+
+return if (sensors.self.health < 20) {
+    Action.Move(sensors.self.position.fleeDirectionFrom(naechster.position)!!)
+} else {
+    // z.B. Angriffs-Logik aus Epic 2
+    Action.Move(sensors.self.position.approachDirectionTo(naechster.position)!!)
+}
+```
+
+> `fleeDirectionFrom`/`approachDirectionTo` liefern nur dann `null`, wenn ihr
+> exakt auf dem Gegner steht (kann in der Praxis nicht passieren, da Felder
+> nicht doppelt belegt werden) — deshalb ist `!!` hier vertretbar.
 
 ---
 
 **Häufige Fehler bei genau dieser Story:**
-- **Vorzeichen verdreht** → Bot rennt beim Fliehen genau **auf** den Gegner zu.
-  Der wichtigste Test: HP künstlich runter (z.B. gegen mehrere Bots), zuschauen —
-  läuft er wirklich **weg**?
-- **`?:`-Fallback vergessen** → Absturz, sobald der letzte Gegner stirbt. Der Bot
-  wird dann von der Engine "eingefroren".
-- **Beide Achsen gleichzeitig bewegen wollen** → geht nicht, `Move` ist eine
-  einzige Richtung. Immer nur eine Achse pro Tick.
+- **`nearestEnemy()`-Ergebnis nicht abgefangen** → Absturz, sobald der letzte
+  Gegner stirbt. Der Bot wird dann von der Engine "eingefroren".
+- **`fleeDirectionFrom`/`approachDirectionTo` verwechselt** → Bot rennt beim
+  Fliehen genau **auf** den Gegner zu. Der wichtigste Test: HP künstlich
+  runter (z.B. gegen mehrere Bots), zuschauen — läuft er wirklich **weg**?
 - **`health <= 20` statt `< 20`** → Grenzfall; die Story sagt "unter 20", also
   `< 20`. Kleinigkeit, aber im Review erwähnen.
+
+---
+
+### Story 1.4 — Keine Bewegung verschwenden (Randcheck)  ·  1 Punkt
+
+**Ziel:** Bevor der Bot sich bewegt, prüft er, ob das Zielfeld überhaupt in
+der Arena liegt.
+
+**Leitfragen:**
+- Wie komme ich von "ich will nach NORTH" auf "welche Position wäre das
+  dann"? → `Position.moved(direction)` (aus `Models.kt`, kein Toolkit-Import
+  nötig).
+- Wie prüfe ich, ob diese Position noch in der Arena liegt? →
+  `zielPosition.isInsideArena(sensors.arenaWidth, sensors.arenaHeight)`.
+- Was mache ich, wenn die gewählte Richtung ungültig wäre? → eine andere
+  Richtung suchen, die gültig ist (z.B. mit `Direction.entries.first { ... }`).
+
+**Taktik-Gedanke:** Ohne diese Prüfung verschenkt ihr am Rand ständig Ticks —
+der Bot "will" gegen die Wand laufen, die Engine lässt die Bewegung
+stillschweigend ausfallen, und ihr steht einfach da. Mit dem Randcheck bewegt
+sich der Bot immer irgendwohin, auch am Rand.
+
+**Häufiger Fehler:** Nur die **gewünschte** Richtung prüfen, aber beim
+"ungültig"-Fall vergessen, überhaupt eine Ersatzrichtung zurückzugeben.
+
+---
+
+### Story 1.5 — Sicherheitsabstand zum nächsten Gegner halten  ·  2 Punkte
+
+**Ziel:** Bot hält unabhängig von seiner HP einen Mindestabstand zum
+nächsten Gegner — unabhängig von Story 1.3 (dort geht's um HP, hier nur um
+Distanz).
+
+**Leitfragen:**
+- Wie messe ich den Abstand auf einem Raster ohne Diagonalen? →
+  `meinePosition.manhattanDistanceTo(gegner.position)`.
+- Ab welcher Distanz ist es "zu nah"? Das legt ihr selbst fest (z.B. `< 2`).
+- Was mache ich, wenn's zu nah ist? → wegbewegen, genau wie in 1.3
+  (`fleeDirectionFrom`).
+
+```kotlin
+val naechster = sensors.nearestEnemy() ?: return Action.Wait
+val abstand = sensors.self.position.manhattanDistanceTo(naechster.position)
+if (abstand < 2) {
+    return Action.Move(sensors.self.position.fleeDirectionFrom(naechster.position)!!)
+}
+```
+
+**Taktik-Gedanke:** Diese Story lohnt sich besonders, **bevor** ihr mit
+Epic 2 (Angriff) anfangt — ein Bot, der nie ungewollt direkt neben einem
+Gegner steht, ist später auch beim Schießen und Verfolgen robuster.
+
+---
+
+### Story 1.6 — Fluchtrichtung mit Wandvermeidung kombinieren  ·  2 Punkte
+
+**Ziel:** Kombiniert 1.3 (Flucht bei niedriger HP) mit 1.4 (Randcheck) — die
+Flucht darf nicht gegen die Wand laufen.
+
+**Leitfragen:**
+- Was passiert, wenn `fleeDirectionFrom` eine Richtung liefert, die aus der
+  Arena hinausführt? Testet das gezielt: Bot in eine Ecke stellen, HP unter
+  20, Gegner so platzieren, dass die "natürliche" Fluchtrichtung nach draußen
+  zeigt.
+- Löst sich das mit genau demselben Muster wie in 1.4? Ja — erst
+  `isInsideArena` prüfen, dann bei Bedarf eine andere gültige Richtung
+  suchen.
+
+```kotlin
+val fluchtRichtung = sensors.self.position.fleeDirectionFrom(naechster.position)!!
+val fluchtZiel = sensors.self.position.moved(fluchtRichtung)
+if (!fluchtZiel.isInsideArena(sensors.arenaWidth, sensors.arenaHeight)) {
+    // andere gültige Richtung suchen, siehe 1.4
+}
+```
+
+**Taktik-Gedanke:** Baut wenn möglich direkt auf eurem 1.4-Code auf, statt
+den Randcheck ein zweites Mal neu zu schreiben — gute Übung, um zu sehen,
+wie sich kleine Bausteine kombinieren lassen.
 
 ---
 
@@ -287,7 +321,7 @@ Kennenlernen von `Shoot`; die "richtige" Zielerei kommt in 2.2.
 
 ---
 
-### Story 2.2 — Auf Gegner in Sichtlinie zielen  ·  3 Punkte
+### Story 2.2 — Auf Gegner in Sichtlinie zielen  ·  2 Punkte
 
 **Ziel:** Nur schießen, wenn ein Gegner **wirklich** in der Schusslinie steht —
 und dann in die richtige Richtung.
@@ -309,25 +343,36 @@ derselben **Zeile** (gleiches `y`) steht:
 ```
 
 **Leitfragen:**
-- Wie prüfe ich, ob ein Gegner treffbar ist? → für jeden Gegner testen:
-  `gegner.position.x == meinX || gegner.position.y == meinY`.
-- Wie finde ich den nächsten davon? → alle Gegner mit einer `for`-Schleife
-  durchgehen, treffbare merken, den mit dem kleinsten Abstand behalten
-  (wie in Story 1.3, nur zusätzlich mit der "in Linie?"-Prüfung).
-- Wie leite ich aus der Position die Schussrichtung ab? → gleiches `x` und Gegner
-  hat kleineres `y` → NORTH; größeres `y` → SOUTH; gleiches `y` und größeres `x`
-  → EAST; sonst WEST.
+- Wie prüfe ich, ob ein Gegner treffbar ist? → fertige Funktion:
+  `sensors.canShoot(gegner)`.
+- Wie finde ich den nächsten treffbaren Gegner? → `sensors.nearestEnemyInLineOfSight()`
+  übernimmt "erst filtern, dann nächsten nehmen" für euch komplett.
+- Wie leite ich aus der Position die Schussrichtung ab? →
+  `sensors.self.position.directionTo(ziel.position)`.
 - Kein Gegner in Linie? → **nicht** ins Leere schießen, lieber `Action.Wait`
   (oder in 2.3: hinlaufen).
 
+```kotlin
+val ziel = sensors.nearestEnemyInLineOfSight()
+if (ziel != null) {
+    return Action.Shoot(sensors.self.position.directionTo(ziel.position)!!)
+}
+return Action.Wait
+```
+
+> `directionTo` liefert nur dann `null`, wenn die beiden Positionen weder
+> gleiches `x` noch gleiches `y` haben — bei einem Ziel aus
+> `nearestEnemyInLineOfSight()` ist das ausgeschlossen, deshalb ist `!!` hier
+> sicher.
+
 **Häufiger Fehler:** Erst den nächsten Gegner suchen und **dann** prüfen, ob er
-in Linie steht. Besser umgekehrt: **erst filtern** (wer ist überhaupt treffbar),
-**dann** den nächsten davon nehmen. Sonst zielt ihr auf jemanden, den ihr gar
-nicht treffen könnt.
+in Linie steht. `nearestEnemyInLineOfSight()` macht es automatisch richtig
+herum: **erst filtern** (wer ist überhaupt treffbar), **dann** den nächsten
+davon nehmen.
 
 ---
 
-### Story 2.3 — Gegner verfolgen  ·  3 Punkte
+### Story 2.3 — Gegner verfolgen  ·  2 Punkte
 
 **Ziel:** Steht kein Gegner in Schusslinie → einen Schritt auf den nächsten
 zulaufen. Kombiniert mit 2.2 ergibt das einen echten Jäger-Bot.
@@ -346,15 +391,87 @@ zulaufen. Kombiniert mit 2.2 ergibt das einen echten Jäger-Bot.
 ```
 
 **Leitfragen:**
-- "Hinlaufen" ist dasselbe wie "Fliehen" aus 1.3 — nur mit **richtigem** (nicht
-  umgekehrtem) Vorzeichen. Welche Achse zuerst? → wieder die mit dem größeren
-  Abstand.
-- Warum nähert man sich damit "diagonal treppenförmig"? → weil man abwechselnd
-  ein Feld in x- und dann in y-Richtung geht, bis man in einer Linie steht.
+- "Hinlaufen" ist dasselbe wie "Fliehen" aus 1.3 — nur die passende
+  Toolkit-Funktion ist `approachDirectionTo` statt `fleeDirectionFrom`:
+  `sensors.self.position.approachDirectionTo(ziel.position)`.
+- Warum nähert man sich damit "diagonal treppenförmig"? → weil
+  `approachDirectionTo` abwechselnd die Achse mit dem größeren Abstand nimmt,
+  bis man in einer Linie steht.
+
+```kotlin
+val ziel = sensors.nearestEnemyInLineOfSight()
+return if (ziel != null) {
+    Action.Shoot(sensors.self.position.directionTo(ziel.position)!!)
+} else {
+    val naechster = sensors.nearestEnemy() ?: return Action.Wait
+    Action.Move(sensors.self.position.approachDirectionTo(naechster.position)!!)
+}
+```
 
 **Taktik-Gedanke:** Das ist genau der `ChaserBot` aus `bots/examples/`. Wenn ihr
 nicht weiterkommt: **nicht abschreiben**, aber die Struktur anschauen und
 verstehen, dann selbst nachbauen.
+
+---
+
+### Story 2.4 — Nicht ins Leere schießen  ·  1 Punkt
+
+**Ziel:** Vor jedem Schuss prüfen, ob wirklich ein Gegner getroffen werden
+kann.
+
+**Leitfragen:**
+- Welche Funktion sagt euch, ob ein Ziel gerade treffbar ist? →
+  `sensors.canShoot(ziel)`.
+- Was tut ihr, wenn kein Ziel treffbar ist? → **nicht** schießen, sondern
+  etwas anderes (bewegen, siehe 1.1 oder später 2.3).
+
+**Taktik-Gedanke:** Diese Story ist eine bewusst kleinere Vorstufe zu 2.2 —
+hier reicht es, den nächsten Gegner zu nehmen und **vor** dem Schuss einmal
+`canShoot` zu prüfen. Der "beste" Gegner in Sichtlinie (2.2) kommt erst
+danach.
+
+---
+
+### Story 2.5 — Schwächsten Gegner in Sichtlinie zuerst angreifen  ·  2 Punkte
+
+**Ziel:** Stehen mehrere Gegner gleichzeitig in Schusslinie, wird der mit den
+wenigsten HP zuerst angegriffen.
+
+**Leitfragen:**
+- Wie bekomme ich **alle** treffbaren Gegner, nicht nur den nächsten? →
+  `sensors.enemiesInLineOfSight()` liefert eine Liste.
+- Wie wähle ich daraus den mit der niedrigsten `health`? → `minByOrNull { it.health }`
+  auf dieser Liste.
+- Achtung: `sensors.weakestEnemy()` (aus Story 3.2) sucht den schwächsten
+  **aller** Gegner, nicht nur der in Sichtlinie — für diese Story braucht ihr
+  die Kombination aus beidem.
+
+```kotlin
+val ziel = sensors.enemiesInLineOfSight().minByOrNull { it.health }
+```
+
+**Taktik-Gedanke:** Ein Gegner mit wenig HP ist mit einem Schuss vielleicht
+schon erledigt — den zuerst auszuschalten reduziert die Zahl der Gegner
+schneller, als stur den nächsten zu bekämpfen.
+
+---
+
+### Story 2.6 — Rückzug beim Schießen vermeiden  ·  2 Punkte
+
+**Ziel:** Steht der Bot in Schusslinie, aber zu nah dran, weicht er zurück
+statt weiter anzugreifen.
+
+**Leitfragen:**
+- Wie kombiniere ich "kann ich schießen" mit "ist es zu nah"? → erst
+  `sensors.canShoot(ziel)` prüfen, dann **innerhalb** davon den Abstand mit
+  `manhattanDistanceTo` checken.
+- Was mache ich bei "zu nah"? → `fleeDirectionFrom`, wie schon in 1.3/1.5 —
+  gleicher Baustein, neue Situation.
+
+**Taktik-Gedanke:** Ohne diese Story bleibt euer Verfolger-Bot (2.3) am Ende
+direkt neben dem Gegner stehen, sobald er ihn treffen kann — unnötig riskant,
+da der Gegner dann auch euch leicht trifft. Ein kleiner Sicherheitsabstand
+beim Schießen macht den Bot deutlich überlebensfähiger.
 
 ---
 
@@ -390,53 +507,40 @@ reagiert immer auf die aktuelle Lage.
 
 ---
 
-### Story 3.2 — Zielpriorisierung bei mehreren Gegnern  ·  3 Punkte
+### Story 3.2 — Zielpriorisierung bei mehreren Gegnern  ·  2 Punkte
 
 **Ziel:** Bei mehreren Gegnern nicht wahllos den erstbesten angreifen, sondern
 nach einer klaren Regel auswählen.
 
-**Der ganze Trick ist ein getauschtes Vergleichs-Kriterium.** Bisher habt ihr in
-der Such-Schleife immer den *nächsten* Gegner gesucht (kleinster Abstand):
+**Der ganze Trick ist eine andere Toolkit-Funktion.** Bisher habt ihr immer den
+*nächsten* Gegner gesucht:
 
 ```kotlin
-// nächster Gegner (wie in 1.3 / 2.3)
-var ziel = sensors.others[0]
-var bester = abs(ziel.position.x - meinX) + abs(ziel.position.y - meinY)
-for (gegner in sensors.others) {
-    val abstand = abs(gegner.position.x - meinX) + abs(gegner.position.y - meinY)
-    if (abstand < bester) {
-        bester = abstand
-        ziel = gegner
-    }
-}
+val ziel = sensors.nearestEnemy() ?: return Action.Wait
 ```
 
-Jetzt vergleicht ihr in derselben Schleife einfach ein **anderes Merkmal** —
-z.B. die HP statt den Abstand:
+Jetzt nehmt ihr statt `nearestEnemy()` einfach `weakestEnemy()` — sucht nach
+einem anderen Kriterium (wenigste HP statt kleinster Abstand), aber liefert
+euch genauso ein einzelnes Ziel (oder `null`, wenn keiner mehr lebt):
 
 ```kotlin
-// schwächster Gegner (wenigste HP)
-var ziel = sensors.others[0]
-var wenigsteHp = ziel.health
-for (gegner in sensors.others) {
-    if (gegner.health < wenigsteHp) {
-        wenigsteHp = gegner.health
-        ziel = gegner
-    }
-}
+val ziel = sensors.weakestEnemy() ?: return Action.Wait
 ```
 
-Gleiche Schleifen-Struktur, nur `< bester` wird zu `< wenigsteHp`. Das ist der
-ganze Lernpunkt der Story.
+Das ist der ganze Lernpunkt der Story: **welches Kriterium** passt zu meiner
+Taktik?
 
 **Leitfragen:**
 - Welche Regel wollt ihr? Mögliche Kriterien:
-  - **schwächster zuerst** (`gegner.health`) — schaltet ihr am schnellsten aus
-    einem Kampf aus.
-  - **nächster zuerst** (Abstand) — am leichtesten zu erreichen/treffen.
+  - **schwächster zuerst** (`sensors.weakestEnemy()`) — schaltet ihr am
+    schnellsten aus einem Kampf aus.
+  - **nächster zuerst** (`sensors.nearestEnemy()`) — am leichtesten zu
+    erreichen/treffen.
 - Egal welches — schreibt als Kommentar dazu, **warum** ihr es gewählt habt.
-- Der Rest (schießen/hinlaufen) bleibt exakt wie in Epic 2, nur mit `ziel` statt
-  `nächster`.
+- Der Rest (schießen/hinlaufen) bleibt exakt wie in Epic 2, nur mit `ziel` aus
+  `weakestEnemy()` statt `nearestEnemy()`. Achtung: für den Schuss müsst ihr
+  trotzdem mit `sensors.canShoot(ziel)` prüfen, ob das gewählte Ziel gerade in
+  Sichtlinie steht — das schwächste Ziel ist nicht automatisch auch treffbar.
 
 **Häufiger Fehler:** Nur das Kriterium ändern, aber vergessen, danach überhaupt
 zu schießen/laufen. Denkt dran, die Aktion aus 2.2/2.3 anzuhängen.
@@ -468,6 +572,70 @@ selbst, der Dozent bestätigt kurz die Machbarkeit.
 **Taktik-Gedanke:** Fangt klein an. Eine simple, funktionierende Idee ist mehr
 wert als eine geniale, die nicht läuft. Baut auf eurem Epic-3.1-Bot auf und fügt
 **einen** cleveren Zusatz hinzu.
+
+---
+
+### Story 3.4 — Zeitgesteuerte Startphase (Patrouille zuerst)  ·  2 Punkte
+
+**Ziel:** In den ersten Ticks patrouilliert der Bot nur, statt sofort in
+einen Kampf zu laufen.
+
+**Leitfragen:**
+- Woher weiß der Bot, wie viele Ticks das Match schon läuft? →
+  `sensors.tick` (zählt bei jedem `decide()`-Aufruf hoch).
+- Wie legt ihr den Schwellenwert fest, ab dem "richtig" gespielt wird? → als
+  klar benannte Konstante im Code, z.B. `const val PATROUILLE_TICKS = 10`.
+
+```kotlin
+if (sensors.tick < PATROUILLE_TICKS) {
+    return Action.Move(Direction.entries.random())
+}
+```
+
+**Taktik-Gedanke:** Eine kurze "Beobachtungsphase" am Matchbeginn verhindert,
+dass euer Bot sofort unüberlegt auf den erstbesten Gegner zurennt, bevor die
+Lage überhaupt klar ist.
+
+---
+
+### Story 3.5 — Abklingzeit nach der Flucht  ·  3 Punkte
+
+**Ziel:** Nach einer Flucht bleibt der Bot noch einige Ticks vorsichtig,
+statt sofort wieder anzugreifen.
+
+**Das ist die erste Story, bei der ihr euch wirklich etwas über mehrere
+Ticks hinweg merken müsst** — nicht mehr "jeden Tick neu berechnen" wie in
+3.1, sondern ein Zähler, der zwischen den `decide()`-Aufrufen erhalten
+bleibt.
+
+**Leitfragen:**
+- Wie merkt sich der Bot etwas zwischen zwei `decide()`-Aufrufen? → eine
+  `var`-Property auf Klassenebene (nicht lokal in `decide()`!).
+- Wann wird der Zähler zurückgesetzt, wann hochgezählt?
+  - Fliehe ich gerade (`health < 20`)? → Zähler auf `0`.
+  - Fliehe ich nicht? → Zähler hochzählen.
+- Wie lange bleibt der Bot "vorsichtig"? Selbst festgelegte Anzahl Ticks
+  (z.B. 5) nach dem letzten Flucht-Tick.
+
+```kotlin
+var ticksSeitFlucht = ABKLINGZEIT_TICKS  // Start: "nicht mehr vorsichtig"
+
+// in decide():
+if (sensors.self.health < 20) {
+    ticksSeitFlucht = 0
+} else {
+    ticksSeitFlucht++
+}
+val nochVorsichtig = ticksSeitFlucht < ABKLINGZEIT_TICKS
+```
+
+**Häufiger Fehler:** Den Zähler als lokale Variable **innerhalb** von
+`decide()` deklarieren — dann vergisst der Bot bei jedem Aufruf wieder alles.
+Er muss eine Property der Bot-**Klasse** sein.
+
+**Taktik-Gedanke:** Guter Anlass, den Unterschied zwischen zustandslos
+(3.1: alles aus `sensors` neu berechnet) und zustandsbehaftet (hier: `var`
+merkt sich etwas) am eigenen Bot zu erleben.
 
 ---
 
@@ -521,11 +689,12 @@ vielleicht noch zu unübersichtlich ist — gute Gelegenheit zum Aufräumen.
 1. **Läuft der Bot überhaupt?** Zurück zu Story 1.1 — taucht er in der Auswahl
    auf, bewegt er sich?
 2. **Absturz?** Meist `sensors.others` leer und trotzdem `sensors.others[0]`
-   oder `.first()` benutzt. Immer **vorher** mit `if (sensors.others.isEmpty())
-   return Action.Wait` abfangen.
-3. **Läuft/schießt falsch herum?** Vorzeichen von `dx`/`dy` prüfen und dran
-   denken: `y` wächst nach **unten**.
-4. **Schießt nie?** Steht ein Gegner wirklich in gleicher Zeile/Spalte? Testet
-   erst gegen `StillstandBot`, da ist es kontrollierbar.
+   oder `.first()` benutzt. Immer **vorher** mit `?:` gegen `null` von
+   `sensors.nearestEnemy()` (oder `sensors.others.isEmpty()`) abfangen.
+3. **Läuft/schießt falsch herum?** `fleeDirectionFrom` und `approachDirectionTo`
+   verwechselt? Dran denken: `y` wächst nach **unten**.
+4. **Schießt nie?** Steht ein Gegner wirklich in gleicher Zeile/Spalte? Prüft
+   mit `sensors.canShoot(gegner)`. Testet erst gegen `StillstandBot`, da ist es
+   kontrollierbar.
 5. Schaut euch die fertigen Bots in `bots/examples/` an — **nicht abschreiben**,
    sondern verstehen und selbst nachbauen.

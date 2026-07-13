@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="520" viewBox="0 0 920 520" font-family="Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="920" height="520" fill="white"/>
+
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+    <polygon points="0 0, 9 3, 0 6" fill="#111"/>
+  </marker>
+</defs>
+
+<text x="460" y="34" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">main-Branch und Feature-Branch im Zusammenspiel</text>
+
+<!-- main branch line -->
+<line x1="70" y1="360" x2="850" y2="360" stroke="#2563eb" stroke-width="4" marker-end="url(#arrow)"/>
+<text x="50" y="366" text-anchor="end" font-size="18" font-weight="bold" fill="#2563eb">main</text>
+
+<!-- feature branch curve: up from branch point, across, back down to merge point -->
+<path d="M300,360 Q300,175 470,175 L610,175 Q660,175 660,360"
+      fill="none" stroke="#f97316" stroke-width="4" stroke-dasharray="8,5"/>
+<text x="230" y="150" text-anchor="middle" font-size="18" font-weight="bold" fill="#f97316">feature/angriffslogik</text>
+
+<!-- commit on main before branch -->
+<circle cx="160" cy="360" r="9" fill="#2563eb"/>
+<text x="160" y="392" text-anchor="middle" font-size="14" fill="#333">Commit</text>
+<text x="160" y="408" text-anchor="middle" font-size="14" fill="#333">"Grundgerüst Bot"</text>
+
+<!-- branch point -->
+<circle cx="300" cy="360" r="12" fill="#ffffff" stroke="#f97316" stroke-width="3"/>
+<text x="300" y="322" text-anchor="middle" font-size="15" font-weight="bold" fill="#f97316">① Branch erstellt</text>
+
+<!-- feature commits -->
+<circle cx="500" cy="175" r="9" fill="#f97316"/>
+<text x="500" y="205" text-anchor="middle" font-size="14" fill="#333">Commit</text>
+<text x="500" y="221" text-anchor="middle" font-size="14" fill="#333">"Zielsuche ergänzt"</text>
+
+<circle cx="590" cy="175" r="9" fill="#f97316"/>
+<text x="590" y="140" text-anchor="middle" font-size="14" fill="#333">"Schießen bei Sichtlinie"</text>
+<text x="590" y="124" text-anchor="middle" font-size="14" fill="#333">Commit</text>
+
+<text x="700" y="150" text-anchor="middle" font-size="15" font-weight="bold" fill="#f97316">② Pull Request</text>
+<text x="700" y="168" text-anchor="middle" font-size="13" fill="#555">"bitte in main übernehmen"</text>
+
+<!-- merge point -->
+<circle cx="660" cy="360" r="12" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+<text x="700" y="322" text-anchor="middle" font-size="15" font-weight="bold" fill="#2563eb">③ Merge in main</text>
+
+<!-- commit after merge -->
+<circle cx="770" cy="360" r="9" fill="#2563eb"/>
+<text x="770" y="392" text-anchor="middle" font-size="14" fill="#333">main enthält jetzt</text>
+<text x="770" y="408" text-anchor="middle" font-size="14" fill="#333">auch die Angriffslogik</text>
+
+<!-- time arrow legend -->
+<text x="850" y="460" text-anchor="end" font-size="13" fill="#777">Zeit →</text>
+</svg>
