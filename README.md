@@ -2,7 +2,7 @@
 
 Kotlin/Compose-Desktop-Projekt für ein Schülerpraktikum: Roboter kämpfen auf einem 10×10-Raster gegeneinander. Schüler schreiben ausschließlich Bot-Entscheidungslogik (`RobotBrain.decide()`), das komplette Framework (Engine, Rendering, Kampf-Regeln) ist fertig.
 
-Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material** (Zeitplan, Tagesprogramme, Backlog, Musterlösungen) liegt in [`docs/`](docs/).
+Dieses Repo ist enthält den **technische Teil** des Kurses (Sourcecode) und das **pädagogische Material** (Zeitplan, Tagesprogramme, Backlog, Musterlösungen) in [`docs/`](docs/).
 
 > 🔴 **Version 2** dieses Praktikums: Gegenüber der ersten Durchführung (Branch `complex` Version 1.0) wurde der Umfang bewusst durch die Nutzung einer Toolkit-Bibliothek (für Distanz-/Richtungsberechnung statt Handrechnung) vereinfacht, damit der Fokus stärker auf Kotlin- und OOP-Grundlagen liegt statt auf zusätzlicher Mathematik.
 
@@ -19,7 +19,7 @@ Dieses Repo ist der **technische Teil** des Kurses. Das **pädagogische Material
 6. Technischer Überblick über die Codebasis: [`CLAUDE.md`](CLAUDE.md).
 7. Ursprüngliche Anforderungen und Design-Entscheidungen: [`docs/dozent/anforderungen.md`](docs/dozent/anforderungen.md).
 8. Zum Ausdrucken: alle Markdown-Dateien liegen auch als PDF in [`docs/pdf/`](docs/pdf/) (Backlog zusätzlich als Story-Karten in Groß, siehe [`docs/pdf/README.md`](docs/pdf/README.md)).
-9. Kurze Bewegungspause nach einer Pause: [`docs/dozent/energizer-menschlicher-bot.md`](docs/dozent/energizer-menschlicher-bot.md) (Tag 1), [`docs/dozent/energizer-schnick-schnack-schnuck-turnier.md`](docs/dozent/energizer-schnick-schnack-schnuck-turnier.md) (Tag 3).
+9. Kurze Energizer nach einer Pause: [`docs/dozent/energizer-menschlicher-bot.md`](docs/dozent/energizer-menschlicher-bot.md) (Tag 1), [`docs/dozent/energizer-schnick-schnack-schnuck-turnier.md`](docs/dozent/energizer-schnick-schnack-schnuck-turnier.md) (Tag 3).
 
 ## Für Schüler: eigenen Bot bauen
 
